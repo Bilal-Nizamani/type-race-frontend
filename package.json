@@ -1,0 +1,32 @@
+{
+  "name": "type-race",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
+    "autoprefixer": "10.4.15",
+    "axios": "^1.4.0",
+    "bufferutil": "^4.0.7",
+    "chart.js": "^4.3.3",
+    "eslint": "8.47.0",
+    "eslint-config-next": "13.4.19",
+    "next": "13.4.19",
+    "postcss": "8.4.28",
+    "react": "18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "18.2.0",
+    "react-redux": "^8.1.2",
+    "redux-thunk": "^2.4.2",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "tailwindcss": "3.3.3",
+    "utf-8-validate": "^5.0.10",
+    "ws": "^8.13.0"
+  }
+}
