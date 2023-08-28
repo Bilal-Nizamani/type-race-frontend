@@ -1,7 +1,10 @@
 "use client";
 import React, { useEffect, useState,useRef, useCallback } from "react";
-import {  useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {addGameData } from '@/redux-store/features/gameDataSlice';
+import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
+
+
 
 const Counter = ({
   gameEnd,
@@ -16,6 +19,7 @@ const Counter = ({
 
   const dispatch = useDispatch();
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
+  
 
   const [wpm, setWpm] = useState(0);
 
@@ -30,7 +34,12 @@ const Counter = ({
       return parseInt((arrayOfwrittenWords.length - 1) / parseInt(speedTestTimer) * 60)
  
 
-  },[arrayOfwrittenWords,speedTestTimer])
+  },[arrayOfwrittenWords,speedTestTimer,])
+
+
+
+  // just cheking is game data cahnging 
+
 
   useEffect(() => {
     if (!gameEnd) {
@@ -43,6 +52,7 @@ const Counter = ({
 
   }, [gameEnd]);
 
+
   useEffect(() => {
     if (!gameEnd) {
         const newSpeedTestTimer = speedTestTimer + 1;
@@ -53,7 +63,6 @@ const Counter = ({
 
   useEffect(() => {
     if (!gameEnd ) {
-    
       if(speedTestTimer+1 === secondsArray.current[secondsArray.current.length-1]) return
       if (arrayOfwrittenWords.length > 0 && speedTestTimer>0 || speedTestTimer>0) {
         wpmArray.current.push(calculateWpm())
@@ -65,20 +74,30 @@ const Counter = ({
   
   useEffect(() => {
     if (arrayOfwrittenWords.length > 0 && speedTestTimer>0 || speedTestTimer>0) {
-      setWpm(calculateWpm);
+      setWpm(calculateWpm());
+      dispatch(addUserShareData({
+        wpm :calculateWpm(),
+      }))
     }
-  }, [arrayOfwrittenWords, speedTestTimer,calculateWpm]); 
+
+  }, [arrayOfwrittenWords, speedTestTimer,calculateWpm,dispatch]);
+  
   
   useEffect(() => {
     if (isCounting) {
       setSpeedTestTimer(0); // Reset the timer
+      dispatch(addUserShareData({
+        wpm :0,
+        accuracy:0,
+        place:''
+      }))
   
       setWpm(0);
       setAccuracy(0);
       secondsArray.current = [];
       wpmArray.current = [];
     }
-  }, [isCounting]); // Added all the relevant set functions as dependencies
+  }, [isCounting,dispatch]); // Added all the relevant set functions as dependencies
   
   useEffect(() => {
     if (isRaceCompleted) {
@@ -90,6 +109,9 @@ const Counter = ({
       });
       const accuracyPercent = Math.floor(((orginalString.length - totalMistakes) / orginalString.length) * 100);
       setAccuracy(accuracyPercent)
+
+      dispatch(addUserShareData({wpm:wpm, accuracy:accuracyPercent, finishingTime:speedTestTimer, place:1}))
+
         dispatch(addGameData({
           wpmArray: wpmArray.current,
           wpm :wpm,

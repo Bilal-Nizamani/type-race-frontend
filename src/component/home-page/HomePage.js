@@ -6,13 +6,30 @@ import Counter from "./Counter";
 import CarRoad from "./CarRoad";
 import { manipulateStringNdColors,modifyString,rmSpce } from "@/utils/serviceFunction";
 import  MyLineChart from './MyLineChart.js'
+import socket from '@/config/socket';
+import { useDispatch, useSelector,shallowEqual } from 'react-redux';
+import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
+import _isEqual from "lodash/isEqual";
+
 
 
 // Sample texts for the race game
 const texts = ["This will start a new test in custom mode. Words that you mistyped more often or words that you typed much slower will be weighted higher and appear more often.",];
 
-
 const RaceGame = () => {
+  const currentSocketSharedData = useSelector(
+    (state) => state.socketSharedData,
+    shallowEqual
+  );
+  const previousSocketSharedDataRef = useRef(currentSocketSharedData);
+
+
+
+
+
+
+  const dispatch = useDispatch();
+
   const [currText, setCurrText] = useState("");
   // userTExt
   const [currUserText, setCurrUserText] = useState("");
@@ -27,8 +44,8 @@ const RaceGame = () => {
   const [isCounting, setIsCounting] = useState(false);
   // array of right writen words
   const [rightText, setRightText] = useState([]);
-
   const [arrayOfwrittenWords, setArrayOfwrittenWords] = useState([]);
+
 
   // wrong writen words nd letters
   let wrongText = "";
@@ -41,14 +58,14 @@ const RaceGame = () => {
   // array of strings
   const [originalStringArray, setOriginalStringArray] = useState([]);
   
-
+  const [roomData, setRoomData] = useState({roomName:'',userName:''})
   // 
   const [isMistakeDeleted, setIsMistakeDeleted]  = useState (false)
 
   const inputRef = useRef(null);
 
   // Start the game countdown
-  const startCounting = () => {
+  const startCounting = useCallback(() => {
 
     const raceText = texts[Math.floor(Math.random() * texts.length)];
     setCurrText(raceText);
@@ -63,11 +80,10 @@ const RaceGame = () => {
     setRightText([]);
     setWrongsLetters([])
     setWrongWords([])
-  };
+  },[]);
 
     // start-Game
     const startGame = useCallback(() => {
-
       setGameEnd(false);
     }, []);
 
@@ -78,7 +94,10 @@ const RaceGame = () => {
           inputRef.current.focus(); // Focus on the input element after a short delay
         }, 100);
       }
-      startGame();  }, [inputRef, startGame]);
+      dispatch(addUserShareData({userName:'bilal'+Math.random(), car:"cultus"+Math.random()}))
+
+
+      startGame();  }, [inputRef, startGame,dispatch]);
 
   // End the game
   const gameEnder = (startingGameText,checkIsGameComplete) => {
@@ -86,6 +105,9 @@ const RaceGame = () => {
     setGameEnd(true);
     setCurrUserText("");
     setIsRaceCompleted(checkIsGameComplete)
+    socket.on('room_players_data',(players_data)=>{
+        console.log(players_data)
+    })
   };
 
   // Handle user input and compare with the original string
@@ -239,6 +261,43 @@ const RaceGame = () => {
     e.preventDefault();
   };
 
+  // socket.io implemeteion
+  // send data if game is palying
+  useEffect(() => {
+    // if cheking if value is not he same when sending socket data
+    if (!_isEqual(currentSocketSharedData, previousSocketSharedDataRef.current) && !gameEnd, !isCounting) {
+   
+      socket.emit('player_data',currentSocketSharedData)
+    }
+
+    // Update the previousSocketSharedDataRef to the current value
+    previousSocketSharedDataRef.current = currentSocketSharedData;
+  }, [currentSocketSharedData, gameEnd, isCounting]);
+
+    const createRoomHandler = ()=>{
+    // if(roomData.roomName.length>1, roomData.userName.length>1){
+    //   socket.emit('create_room',roomData)
+      
+    // }else{alert('fill the data')}
+
+    socket.emit('user_ready_to_play','i am wiaint' )
+  }
+  useEffect(() => {
+    socket.on('match_found', (room)=>{
+     console.log('found this ',room)
+     startCounting(true)
+    })
+   
+     socket.on('room_created',(roomConfirmation)=>{
+     setRoomCreatedMessage(roomConfirmation)
+     })
+
+     // Clean up the socket connection on component unmount
+     return () => {
+       socket.disconnect();
+     };
+   }, [startCounting]);
+
   // Start the game timer
   useEffect(() => {
     if (isCounting && count > 0) {
@@ -249,14 +308,15 @@ const RaceGame = () => {
       return () => clearTimeout(timer);
     } else if (isCounting && count === 0) {
       countingCompleted();
-      setIsCounting(false);
+      setIsCounting(false);   
+
     }
-  }, [count, isCounting, countingCompleted]);
+  }, [count, isCounting, countingCompleted,]);
 
 
   return (
     <>
-  <div className="bg-gray-100 p-8 flex flex-col  2xl:w-[1300px] md:w-[500px] lg:w-[1000px] justify-center">
+  <div className="relative bg-gray-100 p-8 flex flex-col  2xl:w-[1300px] md:w-[500px] lg:w-[1000px] justify-center">
   <div className="absolute top-8 left-[45%] text-3xl font-semibold" id="title">
     Typing Game
   </div>
@@ -270,7 +330,7 @@ const RaceGame = () => {
    <div
     className={`${
       count < 1 ? "hidden" : ""
-    }   text-white bg-black p-5 top-[30%] left-[47%] rounded-xl w-fit absolute
+    }   text-white bg-black p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
      text-4xl font-bold`}
   >
     {count}
@@ -282,7 +342,7 @@ const RaceGame = () => {
       className="mb-4"
     ></div>
   </div>
-  <div className="flex flex-col items-center justify-center mt-8">
+  <div className="flex flex-col items-center justify-center ">
     <input
       ref={inputRef}
       type="text"
@@ -310,7 +370,7 @@ const RaceGame = () => {
     onPaste={(e) => {
       e.preventDefault();
     }}
-    onClick={startCounting}
+    onClick={createRoomHandler}
   >
     Play New
   </button>

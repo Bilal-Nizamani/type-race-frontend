@@ -1,40 +1,73 @@
-'use client'
-import { useEffect, useState } from 'react';
-import socket from '@/config/socket';
+// 'use client'
 
-const RealTimeComponent = () => {
-  const [rcvNumber, setRcvNumber] = useState('');
+// import socket from '@/config/socket';
+// import {  useEffect, useState } from 'react';
 
-  useEffect(() => {
-    const handleReceiveMessage = ({ number }) => {
-      console.log('Received:', number);
-      setRcvNumber(number);
-    };
+// const RealTimeComponent = () => {
+//   const [roomData, setRoomData] = useState({roomName:'',userName:''})
+//   const [roomCreatedMessage, setRoomCreatedMessage] = useState()
 
-    socket.on('connect', () => {
-      console.log('Connected to server');
-    });
+//   const createRoomHandler = ()=>{
+//     // if(roomData.roomName.length>1, roomData.userName.length>1){
+//     //   socket.emit('create_room',roomData)
+      
+//     // }else{alert('fill the data')}
+//     socket.emit('user_ready_to_play','i am wiaint' )
+//   }
+//   const roomNameHandler = (e)=>{
+//     setRoomData((old)=> { return {...old,roomName:e.target.value}})
+//   }
+//   const userNameHandler = (e)=>{
+//     setRoomData((old)=> { return {...old,userName:e.target.value}})
+//   }
 
-    socket.on('receive_message', handleReceiveMessage);
+//   useEffect(() => {
 
-    // Clean up the socket connection on component unmount
-    return () => {
-      socket.off('receive_message', handleReceiveMessage);
-      socket.disconnect();
-    };
-  }, []);
+//    socket.on('match_found', (room)=>{
+//     console.log('found this ',room)
+//    })
+  
+//     socket.on('room_created',(roomConfirmation)=>{
+//     setRoomCreatedMessage(roomConfirmation)
+//     })
 
-  const sendRandomValue = () => {
-    socket.emit('randomNumber', { rdmNumber: Math.random() });
-  };
+//     // Clean up the socket connection on component unmount
+//     return () => {
+//       socket.of(room_created,roomConfirmation)
+//       socket.disconnect();
+//     };
+//   }, []);
 
-  return (
-    <div>
-      <p>Real-time component</p>
-      <div> Yes I am the number {rcvNumber} </div>
-      <button onClick={sendRandomValue}> Get random Number</button>
-    </div>
-  );
-};
 
-export default RealTimeComponent;
+
+//   return (
+//     <div className="container flex flex-col justify-center max-w-[600px] mx-auto p-5">
+//       {/* {roomCreatedMessage && (
+//         <div className="bg-green-200 text-green-800 p-2 rounded mb-4">{roomCreatedMessage}</div>
+//       )} */}
+//       <input
+//         className="w-full px-3 py-2 border rounded mb-2"
+//         value={roomData.roomName}
+//         onChange={roomNameHandler}
+//         placeholder="Room Name"
+//       />
+//       <input
+//         className="w-full px-3 py-2 border rounded mb-2"
+//         value={roomData.userName}
+//         onChange={userNameHandler}
+//         placeholder="Your Name"
+//       />
+//       <button
+//         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+//         onClick={createRoomHandler}
+//       >
+//       Play Game
+//       </button>
+//       <div className="mt-4">
+
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default RealTimeComponent;
