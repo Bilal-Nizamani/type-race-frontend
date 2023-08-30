@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import car_img from '../../../public/jeep.png'
 import Image from "next/image";
-import { useDispatch } from "react-redux";
+import { useDispatch,useSelector } from "react-redux";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 const CarRoad = ({
-  rightText,
   orginalString,
   arrayOfwrittenWords,
-  isCounting,
 }) => {
   const dispatch = useDispatch()
   orginalString = orginalString.split(" ");
   const [carPosition, setCarPosition] = useState(0);
+  const romPlData = useSelector((state) => state.roomConnectedPlayersData)
+  const [otherPlayersData, setOtherPlayersData] = useState()
 
   const carRoad = useRef(null);
   useEffect(() => {
@@ -20,11 +20,20 @@ const CarRoad = ({
 
     if (writtenTextPercent > 0) {
       setCarPosition((roadWidth - 70) * (writtenTextPercent / 100));
-      dispatch(addUserShareData({carPosition:writtenTextPercent / 100}))
+      dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }))
+      
     } else {
       setCarPosition(0);
     }
-  }, [orginalString.length,dispatch, arrayOfwrittenWords.length,]);
+  }, [orginalString.length, dispatch, arrayOfwrittenWords.length,]);
+
+  useEffect(() => {
+    console.log(romPlData)
+    setOtherPlayersData(romPlData)
+    
+  }, [romPlData])
+  
+
 
   return (
     <div className="min-h-[160px] relative   bg-gray-300">

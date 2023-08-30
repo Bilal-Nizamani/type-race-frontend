@@ -3,7 +3,7 @@ import { createSlice, } from "@reduxjs/toolkit";
 const initialState = {
     wpm :0,
     accuracy: 0,
-    userName: 'normal',
+    userName: '',
     finishingTime: '',
     place: '1/4',
     carPosition:''
