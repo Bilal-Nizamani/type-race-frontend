@@ -1,25 +1,26 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addGameData } from "@/redux-store/features/gameDataSlice";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import GameTimer from "./GameTimer";
 
-const Counter = ({
-  gameEnd,
-  rightText,
-  arrayOfwrittenWords,
-  isCounting,
-  wrongsLetters,
-  orginalString,
-  isRaceCompleted,
-  gameEnder,
-}) => {
+const Counter = () => {
   const dispatch = useDispatch();
+  const gameData = useSelector((state) => state.gamePlayData);
+
+  const {
+    isRaceCompleted,
+    gameEnd,
+    rightText,
+    wrongsLetters,
+    orginalString,
+    arrayOfwrittenWords,
+    isCounting,
+  } = gameData;
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
-  const givenTime = useRef(300);
   const secondsArray = useRef([]);
   const wpmArray = useRef([]);
 
@@ -30,29 +31,9 @@ const Counter = ({
     );
   }, [arrayOfwrittenWords, speedTestTimer]);
 
-  const getTimer = (seconds) => {
-    setSpeedTestTimer(seconds - givenTime.current);
-  };
-
-  // just cheking is game data cahnging
-
-  // useEffect(() => {
-  //   if (!gameEnd) {
-  //     const interval = setInterval(() => {
-  //       setSpeedTestTimer((prevElapsedTime) => prevElapsedTime + 1);
-  //     }, 1000); // Update every 1000ms (1 second)
-
-  //     return () => clearInterval(interval);
-  //   }
-  // }, [gameEnd]);
-
-  useEffect(() => {
-    if (!gameEnd) {
-      const newSpeedTestTimer = speedTestTimer + 1;
-
-      if (givenTime.current - newSpeedTestTimer < 1) gameEnder("Time up", true);
-    }
-  }, [speedTestTimer, gameEnd, gameEnder]); // Added setArrayOffSeonds as a dependency
+  const getTimer = useCallback((seconds) => {
+    setSpeedTestTimer(seconds);
+  }, []);
 
   useEffect(() => {
     if (!gameEnd) {
@@ -79,7 +60,7 @@ const Counter = ({
       setWpm(calculateWpm());
       dispatch(
         addUserShareData({
-          wpm: calculateWpm(),
+          arrayOfwrittenWords: arrayOfwrittenWords,
         })
       );
     }
@@ -120,6 +101,8 @@ const Counter = ({
           accuracy: accuracyPercent,
           finishingTime: speedTestTimer,
           place: 1,
+          isRaceCompleted: isRaceCompleted,
+          arrayOfwrittenWords: arrayOfwrittenWords,
         })
       );
 
@@ -152,11 +135,7 @@ const Counter = ({
 
   return (
     <>
-      <GameTimer getTimer={getTimer} />
-      <div className="mb-4 text-gray-600">
-        Given Time: {givenTime.current - parseInt(speedTestTimer)} seconds
-      </div>
-      <div className="text-3xl font-bold mb-6">Timer: {speedTestTimer}s</div>
+      <GameTimer getTimer={getTimer} isRaceCompleted={isRaceCompleted} />
 
       <div className="bg-gray-100 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
         <span className="text-lg font-semibold text-blue-500">WPM: {wpm}</span>

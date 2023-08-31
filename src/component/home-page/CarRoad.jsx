@@ -1,52 +1,75 @@
 import React, { useEffect, useState, useRef } from "react";
-import car_img from '../../../public/jeep.png'
-import Image from "next/image";
-import { useDispatch,useSelector } from "react-redux";
-import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
-const CarRoad = ({
-  orginalString,
-  arrayOfwrittenWords,
-}) => {
-  const dispatch = useDispatch()
-  orginalString = orginalString.split(" ");
-  const [carPosition, setCarPosition] = useState(0);
-  const romPlData = useSelector((state) => state.roomConnectedPlayersData)
-  const [otherPlayersData, setOtherPlayersData] = useState()
 
-  const carRoad = useRef(null);
+import Image from "next/image";
+import { useDispatch, useSelector } from "react-redux";
+import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
+import CarComponent from "./CarComponent";
+import img from "../../../public/1.png";
+
+const CarRoad = ({}) => {
+  const dispatch = useDispatch();
+  const [carPosition, setCarPosition] = useState(0);
+  const [otherPlayersData, setOtherPlayersData] = useState();
+
+  const romPlData = useSelector((state) => state.roomConnectedPlayersData);
+  const gameData = useSelector((state) => {
+    return {
+      orginalString: state.gamePlayData.orginalString,
+      arrayOfwrittenWords: state.gamePlayData.arrayOfwrittenWords,
+    };
+  });
+
   useEffect(() => {
-    const roadWidth = carRoad.current.offsetWidth;
-    const writtenTextPercent = (arrayOfwrittenWords.length * 100) / orginalString.length;
+    // const roadWidth = carRoad.current.offsetWidth;
+    const writtenTextPercent =
+      (gameData.arrayOfwrittenWords.length * 100) /
+      gameData.orginalString.split(" ").length;
 
     if (writtenTextPercent > 0) {
-      setCarPosition((roadWidth - 70) * (writtenTextPercent / 100));
-      dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }))
-      
+      // setCarPosition((roadWidth - 70) * (writtenTextPercent / 100));
+      setCarPosition(writtenTextPercent);
+      dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     } else {
       setCarPosition(0);
     }
-  }, [orginalString.length, dispatch, arrayOfwrittenWords.length,]);
+  }, [gameData.orginalString, dispatch, gameData.arrayOfwrittenWords]);
 
   useEffect(() => {
-    console.log(romPlData)
-    setOtherPlayersData(romPlData)
-    
-  }, [romPlData])
-  
-
+    const romPlayersDataArray = [];
+    Object.keys(romPlData).forEach((item) => {
+      romPlayersDataArray.push(romPlData[item]);
+    });
+    console.log(romPlayersDataArray);
+    setOtherPlayersData(romPlayersDataArray);
+  }, [romPlData]);
 
   return (
-    <div className="min-h-[160px] relative   bg-gray-300">
-      <div ref={carRoad} className="h-1  w-full  bg-gray-700 absolute top-[35%] transform -translate-y-1/2">
+    <div
+      style={{
+        height: (otherPlayersData?.length + 1) * 70 + "px",
+      }}
+      className=" flex justify-around gap-14 pb-1  flex-col bg-slate-800   border-[5px]"
+    >
+      <div className="h-4  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
         <div
-          style={{ left: `${carPosition}px` }}
-          className=" w-12   absolute -top-1/2 transform -translate-y-1/2 rounded-md text-white flex items-center justify-center transition-all duration-300 ease-in-out"
+          style={{ marginLeft: `calc(${carPosition}% - 70px)` }}
+          className=" w-12  transition-all duration-300 ease-in-out"
         >
-        <div className="mt-[-2rem]">
-         <Image src={car_img} alt=""/>
-         </div>
+          <div className="mt-[-2rem]">
+            <Image width={50} height={40} src={"/1.png"} alt="" />
+          </div>
         </div>
       </div>
+
+      {otherPlayersData?.map((item, index) => {
+        return (
+          <CarComponent
+            key={item.userName}
+            index={index + 1}
+            carPosition={item.carPosition}
+          />
+        );
+      })}
     </div>
   );
 };

@@ -13,6 +13,7 @@ const ComponentContainer = () => {
     const car = Math.random();
     dispatch(addUserShareData({ userName: userName, car: car }));
   }, [dispatch]);
+
   return <HomePage />;
 };
 
