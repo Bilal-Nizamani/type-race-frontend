@@ -40,16 +40,16 @@ const RaceGame = () => {
   }, []);
 
   // End the game
-  const gameEnder = (startingGameText, checkIsGameComplete) => {
+  const gameEnder = useCallback((startingGameText, checkIsGameComplete) => {
     setGameEnd(true);
     setIsGameBeingPlayed(false);
     setIsRaceCompleted(checkIsGameComplete);
     setCurrText(startingGameText);
-  };
+  }, []);
 
-  const getCurrText = (text) => {
+  const getCurrText = useCallback((text) => {
     setCurrText(text);
-  };
+  }, []);
 
   useEffect(() => {
     // if cheking if value is not he same when sending socket data
@@ -74,10 +74,11 @@ const RaceGame = () => {
     if (isCounting || isGameBeingPlayed) {
       socket.on("room_players_data", (playersData) => {
         const upDatedPlayers = playersData;
-        const myDataKey = Object.keys(playersData).find(
-          (key) => playersData[key].userName === userShareData?.userName
-        );
-        if (myDataKey !== undefined) delete upDatedPlayers[myDataKey];
+        // const myDataKey = Object.keys(playersData).find(
+        //   (key) => playersData[key].userName === userShareData?.userName
+        // );
+        // if (myDataKey !== undefined) delete upDatedPlayers[myDataKey];
+
         dispatch(addPlayingPlayersData(upDatedPlayers));
       });
     }
@@ -107,7 +108,7 @@ const RaceGame = () => {
     return () => {
       socket.disconnect();
     };
-  }, [startCounting]);
+  }, [startCounting, gameEnder]);
 
   useEffect(() => {
     dispatch(
@@ -118,8 +119,6 @@ const RaceGame = () => {
         isRaceCompleted,
       })
     );
-
-    console.log(isGameBeingPlayed);
   }, [isCounting, isGameBeingPlayed, gameEnd, isRaceCompleted, dispatch]);
 
   // Start the game timer
@@ -170,7 +169,7 @@ const RaceGame = () => {
             gameEnder={gameEnder}
             getCurrText={getCurrText}
           />
-          <Counter gameEnd={gameEnd} gameEnder={gameEnder} />
+          <Counter />
         </div>
         <button
           className="mt-2 p-3 px-5 text-[1.5rem] mx-auto  bg-blue-500 text-white rounded-md hover:bg-blue-600"

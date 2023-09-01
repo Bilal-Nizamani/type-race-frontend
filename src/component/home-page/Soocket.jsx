@@ -10,7 +10,7 @@
 //   const createRoomHandler = ()=>{
 //     // if(roomData.roomName.length>1, roomData.userName.length>1){
 //     //   socket.emit('create_room',roomData)
-      
+
 //     // }else{alert('fill the data')}
 //     socket.emit('user_ready_to_play','i am wiaint' )
 //   }
@@ -24,9 +24,8 @@
 //   useEffect(() => {
 
 //    socket.on('match_found', (room)=>{
-//     console.log('found this ',room)
 //    })
-  
+
 //     socket.on('room_created',(roomConfirmation)=>{
 //     setRoomCreatedMessage(roomConfirmation)
 //     })
@@ -37,8 +36,6 @@
 //       socket.disconnect();
 //     };
 //   }, []);
-
-
 
 //   return (
 //     <div className="container flex flex-col justify-center max-w-[600px] mx-auto p-5">

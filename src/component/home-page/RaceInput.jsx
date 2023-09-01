@@ -1,6 +1,6 @@
 "use client";
 import _ from "lodash";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, memo } from "react";
 import {
   manipulateStringNdColors,
   modifyString,
@@ -13,7 +13,6 @@ const RaceInput = ({ getCurrText, gameEnd, gameEnder }) => {
   const inputRef = useRef(null);
   const dispatch = useDispatch();
   let wrongText = "";
-
   const [wrongWords, setWrongWords] = useState([]);
   const [originalStringArray, setOriginalStringArray] = useState([]);
   const [isMistakeDeleted, setIsMistakeDeleted] = useState(false);
@@ -45,20 +44,10 @@ const RaceInput = ({ getCurrText, gameEnd, gameEnder }) => {
     dispatch(
       addGamePlayData({
         arrayOfwrittenWords,
-        originalStringArray,
         orginalString,
-        wrongsLetters,
-        wrongWords,
       })
     );
-  }, [
-    arrayOfwrittenWords,
-    orginalString,
-    wrongsLetters,
-    originalStringArray,
-    wrongWords,
-    dispatch,
-  ]);
+  }, [arrayOfwrittenWords, orginalString, dispatch]);
 
   // Handle user input change
   const handleInput = (e) => {
@@ -74,6 +63,15 @@ const RaceInput = ({ getCurrText, gameEnd, gameEnder }) => {
       originalStringArray.length === 1 &&
       userInput === originalStringArray[0]
     ) {
+      dispatch(
+        addGamePlayData({
+          arrayOfwrittenWords,
+          originalStringArray,
+          wrongsLetters,
+          wrongWords,
+        })
+      );
+
       const gameWinText = "You won";
       setArrayOfwrittenWords(rightText);
       setRightText([]);

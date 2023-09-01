@@ -10,7 +10,7 @@ const ComponentContainer = () => {
 
   useEffect(() => {
     const userName = "guest" + Math.random();
-    const car = Math.random();
+    const car = Math.floor(Math.random() * 6) + 1;
     dispatch(addUserShareData({ userName: userName, car: car }));
   }, [dispatch]);
 

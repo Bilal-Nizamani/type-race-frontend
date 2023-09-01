@@ -1,13 +1,32 @@
 "use client";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  memo,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addGameData } from "@/redux-store/features/gameDataSlice";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import GameTimer from "./GameTimer";
 
-const Counter = () => {
+const Counter = memo(function Counter() {
   const dispatch = useDispatch();
+  const [serverWpm, setServerWpm] = useState(0);
+
   const gameData = useSelector((state) => state.gamePlayData);
+  const roomPlsData = useSelector((state) => state.roomConnectedPlayersData);
+  const userName = useSelector((state) => state.socketSharedData.userName);
+  const memoizedRoomPlsData = useMemo(() => roomPlsData, [roomPlsData]);
+
+  useEffect(() => {
+    for (const key in memoizedRoomPlsData) {
+      if (memoizedRoomPlsData[key]?.userName === userName)
+        setServerWpm(memoizedRoomPlsData[key].wpm);
+    }
+  }, [memoizedRoomPlsData, userName]);
 
   const {
     isRaceCompleted,
@@ -19,17 +38,18 @@ const Counter = () => {
     isCounting,
   } = gameData;
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
-  const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
   const secondsArray = useRef([]);
+
   const wpmArray = useRef([]);
 
-  const calculateWpm = useCallback(() => {
-    if (arrayOfwrittenWords.length - 1 < 1) return 0;
-    return parseInt(
-      ((arrayOfwrittenWords.length - 1) / parseInt(speedTestTimer)) * 60
-    );
-  }, [arrayOfwrittenWords, speedTestTimer]);
+  // const calculateWpm = useCallback(() => {
+  //   if (arrayOfwrittenWords.length - 1 < 1) return 0;
+
+  //   return parseInt(
+  //     (arrayOfwrittenWords.length / parseInt(speedTestTimer)) * 60
+  //   );
+  // }, [arrayOfwrittenWords, speedTestTimer]);
 
   const getTimer = useCallback((seconds) => {
     setSpeedTestTimer(seconds);
@@ -37,34 +57,22 @@ const Counter = () => {
 
   useEffect(() => {
     if (!gameEnd) {
-      if (
-        speedTestTimer + 1 ===
-        secondsArray.current[secondsArray.current.length - 1]
-      )
-        return;
-      if (
-        (arrayOfwrittenWords.length > 0 && speedTestTimer > 0) ||
-        speedTestTimer > 0
-      ) {
-        wpmArray.current.push(calculateWpm());
-      } else wpmArray.current.push(0);
       secondsArray.current.push(speedTestTimer + 1);
+      wpmArray.current.push(serverWpm);
     }
-  }, [gameEnd, speedTestTimer, calculateWpm, arrayOfwrittenWords]);
+  }, [gameEnd, speedTestTimer, serverWpm]); // removed calculate wpm
+
+  // useEffect(() => {
+  //   wpmArray.current.push(serverWpm);
+  // }, [serverWpm]);
 
   useEffect(() => {
-    if (
-      (arrayOfwrittenWords.length > 0 && speedTestTimer > 0) ||
-      speedTestTimer > 0
-    ) {
-      setWpm(calculateWpm());
-      dispatch(
-        addUserShareData({
-          arrayOfwrittenWords: arrayOfwrittenWords,
-        })
-      );
-    }
-  }, [arrayOfwrittenWords, speedTestTimer, calculateWpm, dispatch]);
+    dispatch(
+      addUserShareData({
+        arrayOfwrittenWords: arrayOfwrittenWords,
+      })
+    );
+  }, [arrayOfwrittenWords, speedTestTimer, dispatch]); //calculateWpm,
 
   useEffect(() => {
     if (isCounting) {
@@ -77,12 +85,11 @@ const Counter = () => {
         })
       );
 
-      setWpm(0);
       setAccuracy(0);
       secondsArray.current = [];
       wpmArray.current = [];
     }
-  }, [isCounting, dispatch]); // Added all the relevant set functions as dependencies
+  }, [isCounting, dispatch]); // Added all Gthe relevant set functions as dependencies
 
   useEffect(() => {
     if (isRaceCompleted) {
@@ -97,7 +104,6 @@ const Counter = () => {
 
       dispatch(
         addUserShareData({
-          wpm: wpm,
           accuracy: accuracyPercent,
           finishingTime: speedTestTimer,
           place: 1,
@@ -109,7 +115,7 @@ const Counter = () => {
       dispatch(
         addGameData({
           wpmArray: wpmArray.current,
-          wpm: wpm,
+          wpm: serverWpm,
           givenString: orginalString,
           writenString: rightText,
           secondsArray: secondsArray.current,
@@ -128,8 +134,9 @@ const Counter = () => {
     orginalString,
     wrongsLetters,
     secondsArray,
-    wpm,
+    serverWpm,
     rightText,
+    // calculateWpm,
     dispatch,
   ]); // Added dispatch as a dependency
 
@@ -138,11 +145,13 @@ const Counter = () => {
       <GameTimer getTimer={getTimer} isRaceCompleted={isRaceCompleted} />
 
       <div className="bg-gray-100 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
-        <span className="text-lg font-semibold text-blue-500">WPM: {wpm}</span>
+        <span className="text-lg font-semibold text-blue-500">
+          WPM: {serverWpm}
+        </span>
         <div className="text-lg text-green-500">Accuracy: {accuracy}%</div>
       </div>
     </>
   );
-};
+});
 
 export default Counter;
