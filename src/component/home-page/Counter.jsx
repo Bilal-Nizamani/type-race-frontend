@@ -43,14 +43,6 @@ const Counter = memo(function Counter() {
 
   const wpmArray = useRef([]);
 
-  // const calculateWpm = useCallback(() => {
-  //   if (arrayOfwrittenWords.length - 1 < 1) return 0;
-
-  //   return parseInt(
-  //     (arrayOfwrittenWords.length / parseInt(speedTestTimer)) * 60
-  //   );
-  // }, [arrayOfwrittenWords, speedTestTimer]);
-
   const getTimer = useCallback((seconds) => {
     setSpeedTestTimer(seconds);
   }, []);
@@ -61,10 +53,6 @@ const Counter = memo(function Counter() {
       wpmArray.current.push(serverWpm);
     }
   }, [gameEnd, speedTestTimer, serverWpm]); // removed calculate wpm
-
-  // useEffect(() => {
-  //   wpmArray.current.push(serverWpm);
-  // }, [serverWpm]);
 
   useEffect(() => {
     dispatch(
@@ -127,18 +115,7 @@ const Counter = memo(function Counter() {
         })
       );
     }
-  }, [
-    isRaceCompleted,
-    arrayOfwrittenWords,
-    speedTestTimer,
-    orginalString,
-    wrongsLetters,
-    secondsArray,
-    serverWpm,
-    rightText,
-    // calculateWpm,
-    dispatch,
-  ]); // Added dispatch as a dependency
+  }, [isRaceCompleted, arrayOfwrittenWords, speedTestTimer, orginalString, wrongsLetters, secondsArray, serverWpm, rightText, dispatch]); // Added dispatch as a dependency
 
   return (
     <>
