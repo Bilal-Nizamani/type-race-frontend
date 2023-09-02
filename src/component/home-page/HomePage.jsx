@@ -74,11 +74,6 @@ const RaceGame = () => {
     if (isCounting || isGameBeingPlayed) {
       socket.on("room_players_data", (playersData) => {
         const upDatedPlayers = playersData;
-        // const myDataKey = Object.keys(playersData).find(
-        //   (key) => playersData[key].userName === userShareData?.userName
-        // );
-        // if (myDataKey !== undefined) delete upDatedPlayers[myDataKey];
-
         dispatch(addPlayingPlayersData(upDatedPlayers));
       });
     }
