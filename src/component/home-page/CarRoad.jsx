@@ -5,7 +5,7 @@ import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import CarComponent from "./CarComponent";
 import Image from "next/image";
 
-const CarRoad = ({}) => {
+const CarRoad = () => {
   const dispatch = useDispatch();
   const [myData, setMyData] = useState({ carPosition: 0 });
   const [otherPlayersData, setOtherPlayersData] = useState([]);
@@ -37,6 +37,7 @@ const CarRoad = ({}) => {
         romPlayersDataArray.push(romPlData[item]);
       }
     });
+
     setOtherPlayersData(romPlayersDataArray);
   }, [romPlData, userName]);
 
@@ -55,7 +56,7 @@ const CarRoad = ({}) => {
           className=" w-12  transition-all duration-300 ease-in-out"
         >
           <div className="mt-[-2rem]">
-            <Image width={50} height={40} src={`/${2}.png`} alt="asdfasdf" />
+            <Image width={50} height={40} src={`/${car}.png`} alt="asdfasdf" />
           </div>
         </div>
       </div>

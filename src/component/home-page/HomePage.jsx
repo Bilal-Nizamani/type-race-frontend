@@ -75,22 +75,20 @@ const RaceGame = () => {
 
   const createRoomHandler = () => {
     socket.emit("user_ready_to_play", "i am wiaint");
-    console.log(currentSocketSharedData);
   };
 
   useEffect(() => {
     socket.on("match_found", (raceText) => {
       setIsGameBeingPlayed(false);
       gameEnder(raceText, false);
-      socket.emit("player_data", currentSocketSharedData);
-    });
-
-    socket.on("hi", (dd) => {
-      console.log({ dd });
+      setIsCounting(true);
     });
 
     socket.on("room_created", (roomConfirmation) => {
       setRoomCreatedMessage(roomConfirmation);
+    });
+    socket.on("room_delted", () => {
+      console.log(room);
     });
 
     socket.on("time_up", () => {
@@ -114,7 +112,7 @@ const RaceGame = () => {
     return () => {
       socket.disconnect();
     };
-  }, [gameEnder, currentSocketSharedData]);
+  }, [gameEnder]);
 
   useEffect(() => {
     dispatch(
