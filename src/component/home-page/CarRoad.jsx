@@ -1,72 +1,60 @@
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { memo, useEffect, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import CarComponent from "./CarComponent";
 import Image from "next/image";
 
-const CarRoad = ({}) => {
+const CarRoad = memo(function CarRoad() {
   const dispatch = useDispatch();
-  const [myData, setMyData] = useState({});
-  const [otherPlayersData, setOtherPlayersData] = useState();
-
-  const data = useSelector((state) => {
-    return {
-      romPlData: state.roomConnectedPlayersData,
-      gameData: {
-        orginalString: state.gamePlayData.orginalString,
-        arrayOfwrittenWords: state.gamePlayData.arrayOfwrittenWords,
-      },
-      userName: state.socketSharedData.userName,
-      car: state.socketSharedData.car,
-    };
-  });
-
-  const { romPlData, gameData, userName, car } = data;
+  const [myData, setMyData] = useState({ carPosition: 0 });
+  const [otherPlayersData, setOtherPlayersData] = useState([]);
+  const romPlData = useSelector((state) => state.roomConnectedPlayersData);
+  const gameData = useSelector((state) => state.gamePlayData);
+  const socketSharedData = useSelector((state) => state.socketSharedData);
+  const { arrayOfwrittenWords, orginalString } = gameData;
+  const { userName, car } = socketSharedData;
 
   useEffect(() => {
-    console.log(gameData.orginalString);
     const writtenTextPercent =
-      (gameData.arrayOfwrittenWords.length * 100) /
-      gameData.orginalString.split(" ").length;
+      (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
 
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
-  }, [gameData.orginalString, dispatch, gameData.arrayOfwrittenWords]);
+  }, [dispatch, arrayOfwrittenWords, orginalString]);
 
   useEffect(() => {
     const romPlayersDataArray = [];
     Object.keys(romPlData).forEach((item) => {
-      if (item.userName === userName) {
-        console.log("asdf");
+      if (romPlData[item].userName === userName) {
         setMyData(romPlData[item]);
         return;
+      } else {
+        romPlayersDataArray.push(romPlData[item]);
       }
-
-      romPlayersDataArray.push(romPlData[item]);
     });
+
     setOtherPlayersData(romPlayersDataArray);
   }, [romPlData, userName]);
 
   return (
     <div
       style={{
-        height: otherPlayersData?.length * 70 + "px",
+        height: (otherPlayersData?.length + 1) * 70 + "px",
       }}
       className=" flex justify-around gap-14 pb-1  flex-col bg-slate-800   border-[5px]"
     >
       <div className="h-4  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
         <div
           style={{
-            marginLeft: `calc(${
-              myData?.carPosition ? myData?.carPosition : 0
-            }% - 70px)`,
+            marginLeft: `calc(${myData.carPosition * 100}% - 70px)`,
           }}
           className=" w-12  transition-all duration-300 ease-in-out"
         >
           <div className="mt-[-2rem]">
-            <Image width={50} height={40} src={`/${car}}.png`} alt="asdfasdf" />
+            <Image width={50} height={40} src={`/${car}.png`} alt="asdfasdf" />
           </div>
         </div>
       </div>
@@ -76,6 +64,6 @@ const CarRoad = ({}) => {
       })}
     </div>
   );
-};
+});
 
 export default CarRoad;

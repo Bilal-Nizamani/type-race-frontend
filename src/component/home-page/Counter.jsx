@@ -18,15 +18,15 @@ const Counter = memo(function Counter() {
 
   const gameData = useSelector((state) => state.gamePlayData);
   const roomPlsData = useSelector((state) => state.roomConnectedPlayersData);
-  const userName = useSelector((state) => state.socketSharedData.userName);
+  const socketSharedData = useSelector((state) => state.socketSharedData);
   const memoizedRoomPlsData = useMemo(() => roomPlsData, [roomPlsData]);
 
   useEffect(() => {
     for (const key in memoizedRoomPlsData) {
-      if (memoizedRoomPlsData[key]?.userName === userName)
+      if (memoizedRoomPlsData[key]?.userName === socketSharedData.userName)
         setServerWpm(memoizedRoomPlsData[key].wpm);
     }
-  }, [memoizedRoomPlsData, userName]);
+  }, [memoizedRoomPlsData, socketSharedData.userName]);
 
   const {
     isRaceCompleted,
@@ -37,6 +37,7 @@ const Counter = memo(function Counter() {
     arrayOfwrittenWords,
     isCounting,
   } = gameData;
+
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
   const secondsArray = useRef([]);
@@ -52,7 +53,7 @@ const Counter = memo(function Counter() {
       secondsArray.current.push(speedTestTimer + 1);
       wpmArray.current.push(serverWpm);
     }
-  }, [gameEnd, speedTestTimer, serverWpm]); // removed calculate wpm
+  }, [gameEnd, speedTestTimer, serverWpm]);
 
   useEffect(() => {
     dispatch(
@@ -72,7 +73,6 @@ const Counter = memo(function Counter() {
           place: "",
         })
       );
-
       setAccuracy(0);
       secondsArray.current = [];
       wpmArray.current = [];
@@ -82,7 +82,7 @@ const Counter = memo(function Counter() {
   useEffect(() => {
     if (isRaceCompleted) {
       let totalMistakes = 0;
-      wrongsLetters.forEach((item) => {
+      wrongsLetters?.forEach((item) => {
         totalMistakes += item.mistakeLetters.length;
       });
       const accuracyPercent = Math.floor(
@@ -97,6 +97,7 @@ const Counter = memo(function Counter() {
           place: 1,
           isRaceCompleted: isRaceCompleted,
           arrayOfwrittenWords: arrayOfwrittenWords,
+          wpm: serverWpm,
         })
       );
 
@@ -115,7 +116,7 @@ const Counter = memo(function Counter() {
         })
       );
     }
-  }, [isRaceCompleted, arrayOfwrittenWords, speedTestTimer, orginalString, wrongsLetters, secondsArray, serverWpm, rightText, dispatch]); // Added dispatch as a dependency
+  }, [isRaceCompleted, arrayOfwrittenWords, speedTestTimer, orginalString, wrongsLetters, secondsArray, serverWpm, rightText, dispatch]);
 
   return (
     <>
