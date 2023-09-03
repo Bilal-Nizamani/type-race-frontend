@@ -1,22 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+"use client";
+import React, { memo, useEffect, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import CarComponent from "./CarComponent";
 import Image from "next/image";
 
-const CarRoad = () => {
+const CarRoad = memo(function CarRoad() {
   const dispatch = useDispatch();
   const [myData, setMyData] = useState({ carPosition: 0 });
   const [otherPlayersData, setOtherPlayersData] = useState([]);
-
   const romPlData = useSelector((state) => state.roomConnectedPlayersData);
-  const gameData = useSelector((state) => state.gameData);
+  const gameData = useSelector((state) => state.gamePlayData);
   const socketSharedData = useSelector((state) => state.socketSharedData);
   const { arrayOfwrittenWords, orginalString } = gameData;
   const { userName, car } = socketSharedData;
-
-  // const { romPlData, gameData, userName, car } = memoData;
 
   useEffect(() => {
     const writtenTextPercent =
@@ -25,7 +23,7 @@ const CarRoad = () => {
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
-  }, [orginalString, dispatch, arrayOfwrittenWords]);
+  }, [dispatch, arrayOfwrittenWords, orginalString]);
 
   useEffect(() => {
     const romPlayersDataArray = [];
@@ -66,6 +64,6 @@ const CarRoad = () => {
       })}
     </div>
   );
-};
+});
 
 export default CarRoad;

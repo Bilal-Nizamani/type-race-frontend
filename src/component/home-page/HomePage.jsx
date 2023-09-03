@@ -88,7 +88,7 @@ const RaceGame = () => {
       setRoomCreatedMessage(roomConfirmation);
     });
     socket.on("room_delted", () => {
-      console.log(room);
+      console.log("room ended");
     });
 
     socket.on("time_up", () => {

@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { addGameData } from "@/redux-store/features/gameDataSlice";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import GameTimer from "./GameTimer";
-import socket from "@/config/socket";
 
 const Counter = memo(function Counter() {
   const dispatch = useDispatch();
