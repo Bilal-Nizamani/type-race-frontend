@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
@@ -10,29 +10,22 @@ const CarRoad = ({}) => {
   const [myData, setMyData] = useState({ carPosition: 0 });
   const [otherPlayersData, setOtherPlayersData] = useState([]);
 
-  const data = useSelector((state) => {
-    return {
-      romPlData: state.roomConnectedPlayersData,
-      gameData: {
-        orginalString: state.gamePlayData.orginalString,
-        arrayOfwrittenWords: state.gamePlayData.arrayOfwrittenWords,
-      },
-      userName: state.socketSharedData.userName,
-      car: state.socketSharedData.car,
-    };
-  });
+  const romPlData = useSelector((state) => state.roomConnectedPlayersData);
+  const gameData = useSelector((state) => state.gameData);
+  const socketSharedData = useSelector((state) => state.socketSharedData);
+  const { arrayOfwrittenWords, orginalString } = gameData;
+  const { userName, car } = socketSharedData;
 
-  const { romPlData, gameData, userName, car } = data;
+  // const { romPlData, gameData, userName, car } = memoData;
 
   useEffect(() => {
     const writtenTextPercent =
-      (gameData.arrayOfwrittenWords.length * 100) /
-      gameData.orginalString.split(" ").length;
+      (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
 
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
-  }, [gameData.orginalString, dispatch, gameData.arrayOfwrittenWords]);
+  }, [orginalString, dispatch, arrayOfwrittenWords]);
 
   useEffect(() => {
     const romPlayersDataArray = [];
@@ -62,7 +55,7 @@ const CarRoad = ({}) => {
           className=" w-12  transition-all duration-300 ease-in-out"
         >
           <div className="mt-[-2rem]">
-            <Image width={50} height={40} src={`/${car}.png`} alt="asdfasdf" />
+            <Image width={50} height={40} src={`/${2}.png`} alt="asdfasdf" />
           </div>
         </div>
       </div>

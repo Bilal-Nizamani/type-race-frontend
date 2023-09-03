@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Counter from "./Counter";
 import CarRoad from "./CarRoad";
@@ -27,17 +28,10 @@ const RaceGame = () => {
   // to show speed or not or reset car
   const [checkDataSend, setCheckDataSend] = useState(false);
 
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(0);
   const [isCounting, setIsCounting] = useState(false);
 
   const [isGameBeingPlayed, setIsGameBeingPlayed] = useState(false);
-
-  // Start the game countdown
-  const startCounting = useCallback(() => {
-    setIsCounting(true);
-    setCheckDataSend(true);
-    setCount(5); // Reset count to 5 when starting again
-  }, []);
 
   // End the game
   const gameEnder = useCallback((startingGameText, checkIsGameComplete) => {
@@ -81,13 +75,18 @@ const RaceGame = () => {
 
   const createRoomHandler = () => {
     socket.emit("user_ready_to_play", "i am wiaint");
+    console.log(currentSocketSharedData);
   };
 
   useEffect(() => {
     socket.on("match_found", (raceText) => {
-      startCounting(true);
       setIsGameBeingPlayed(false);
       gameEnder(raceText, false);
+      socket.emit("player_data", currentSocketSharedData);
+    });
+
+    socket.on("hi", (dd) => {
+      console.log({ dd });
     });
 
     socket.on("room_created", (roomConfirmation) => {
@@ -99,11 +98,23 @@ const RaceGame = () => {
       gameEnder("Time UP", true);
     });
 
+    socket.on("counter_update", (countTimer) => {
+      setCount(countTimer);
+      setCheckDataSend(true);
+    });
+
+    socket.on("counting_completed", () => {
+      setIsCounting(false);
+      setIsGameBeingPlayed(true);
+      socket.emit("game_started", {});
+      setGameEnd(false);
+      setCount(0);
+    });
     // Clean up the socket connection on component unmount
     return () => {
       socket.disconnect();
     };
-  }, [startCounting, gameEnder]);
+  }, [gameEnder, currentSocketSharedData]);
 
   useEffect(() => {
     dispatch(
@@ -115,22 +126,6 @@ const RaceGame = () => {
       })
     );
   }, [isCounting, isGameBeingPlayed, gameEnd, isRaceCompleted, dispatch]);
-
-  // Start the game timer
-  useEffect(() => {
-    if (isCounting && count > 0) {
-      const timer = setTimeout(() => {
-        setCount((prevCount) => prevCount - 1);
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    } else if (isCounting && count === 0) {
-      setIsCounting(false);
-      setIsGameBeingPlayed(true);
-      socket.emit("game_started", {});
-      setGameEnd(false);
-    }
-  }, [count, isCounting]);
 
   return (
     <>

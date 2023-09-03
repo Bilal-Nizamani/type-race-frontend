@@ -11,7 +11,7 @@ const CarComponent = ({ userData }) => {
         className={` w-12 mb-14  transition-all duration-300 ease-in-out`}
       >
         <div className="mt-[-2rem] flex">
-          <Image width={100} height={100} src={`/${car}.png`} alt="" />
+          <Image width={100} height={100} src={`/${1}.png`} alt="" />
           <span className="text-white">{wpm} </span>
         </div>
       </div>

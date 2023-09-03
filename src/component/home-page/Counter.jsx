@@ -83,7 +83,7 @@ const Counter = memo(function Counter() {
   useEffect(() => {
     if (isRaceCompleted) {
       let totalMistakes = 0;
-      wrongsLetters.forEach((item) => {
+      wrongsLetters?.forEach((item) => {
         totalMistakes += item.mistakeLetters.length;
       });
       const accuracyPercent = Math.floor(
