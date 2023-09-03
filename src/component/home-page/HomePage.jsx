@@ -87,13 +87,17 @@ const RaceGame = () => {
     socket.on("room_created", (roomConfirmation) => {
       setRoomCreatedMessage(roomConfirmation);
     });
-    socket.on("room_delted", () => {
-      console.log("room ended");
-    });
 
     socket.on("time_up", () => {
       setGameEnd(true);
       gameEnder("Time UP", true);
+      setIsGameBeingPlayed(false);
+    });
+
+    socket.on("game_completed", () => {
+      setGameEnd(true);
+      gameEnder("Race Ended", true);
+      setIsGameBeingPlayed(false);
     });
 
     socket.on("counter_update", (countTimer) => {
