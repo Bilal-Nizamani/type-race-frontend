@@ -92,15 +92,21 @@ const RaceGame = () => {
       setGameEnd(true);
       gameEnder("Time UP", true);
       setIsGameBeingPlayed(false);
+      setIsRaceCompleted(false);
     });
 
     socket.on("game_completed", () => {
       setGameEnd(true);
       gameEnder("Race Ended", true);
       setIsGameBeingPlayed(false);
+      setIsRaceCompleted(false);
+    });
+    socket.on("left_alone", () => {
+      setCount(0);
+      setCheckDataSend(true);
     });
 
-    socket.on("counter_update", (countTimer) => {
+    socket.on("countdown_timer", (countTimer) => {
       setCount(countTimer);
       setCheckDataSend(true);
     });
@@ -160,6 +166,7 @@ const RaceGame = () => {
             gameEnd={gameEnd}
             gameEnder={gameEnder}
             getCurrText={getCurrText}
+            isGameBeingPlayed={isGameBeingPlayed}
           />
           <Counter />
         </div>

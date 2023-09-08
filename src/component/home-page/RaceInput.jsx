@@ -9,7 +9,12 @@ import {
 import socket from "@/config/socket";
 import { useDispatch } from "react-redux";
 import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
-const RaceInput = ({ getCurrText, gameEnd, gameEnder }) => {
+const RaceInput = memo(function RaceInput({
+  isGameBeingPlayed,
+  getCurrText,
+  gameEnd,
+  gameEnder,
+}) {
   const inputRef = useRef(null);
   const dispatch = useDispatch();
   let wrongText = "";
@@ -38,6 +43,16 @@ const RaceInput = ({ getCurrText, gameEnd, gameEnder }) => {
   useEffect(() => {
     getCurrText(currText);
   }, [getCurrText, currText]);
+
+  useEffect(() => {
+    if (isGameBeingPlayed) {
+      if (inputRef.current) {
+        setTimeout(() => {
+          inputRef.current.focus(); // Focus on the input element after a short delay
+        }, 100);
+      }
+    }
+  }, [isGameBeingPlayed]);
 
   // * adding data gameplayData
   useEffect(() => {
@@ -236,6 +251,6 @@ const RaceInput = ({ getCurrText, gameEnd, gameEnder }) => {
       }`}
     />
   );
-};
+});
 
 export default RaceInput;
