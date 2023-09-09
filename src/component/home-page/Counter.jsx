@@ -40,8 +40,7 @@ const Counter = memo(function Counter() {
 
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
-  const secondsArray = useRef([]);
-
+  const secondsArray = useRef(new Set());
   const wpmArray = useRef([]);
 
   const getTimer = useCallback((seconds) => {
@@ -50,7 +49,7 @@ const Counter = memo(function Counter() {
 
   useEffect(() => {
     if (!gameEnd) {
-      secondsArray.current.push(speedTestTimer + 1);
+      secondsArray.current.add(speedTestTimer + 1);
       wpmArray.current.push(serverWpm);
     }
   }, [gameEnd, speedTestTimer, serverWpm]);
@@ -74,7 +73,7 @@ const Counter = memo(function Counter() {
         })
       );
       setAccuracy(0);
-      secondsArray.current = [];
+      secondsArray.current = new Set();
       wpmArray.current = [];
     }
   }, [isCounting, dispatch]); // Added all Gthe relevant set functions as dependencies
@@ -110,7 +109,7 @@ const Counter = memo(function Counter() {
           wpm: serverWpm,
           givenString: orginalString,
           writenString: rightText,
-          secondsArray: secondsArray.current,
+          secondsArray: Array.from(secondsArray.current),
           typeTime: speedTestTimer,
           accuracy: accuracyPercent,
           gameType: "normal",

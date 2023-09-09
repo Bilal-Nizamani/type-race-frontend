@@ -126,7 +126,7 @@ const RaceGame = () => {
       setGameEnd(true);
       gameEnder("Race Ended", true);
       setIsGameBeingPlayed(false);
-      setIsRaceCompleted(false);
+      setIsRaceCompleted(true);
     });
     socket.on("left_alone", () => {
       setCount(0);

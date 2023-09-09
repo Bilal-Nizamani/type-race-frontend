@@ -18,8 +18,10 @@ const CarRoad = memo(function CarRoad() {
 
   useEffect(() => {
     const writtenTextPercent =
-      (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
-
+      (arrayOfwrittenWords?.length * 100) /
+      // cuting 1 from length because extra value of " " get added at the end when
+      // splited by " "
+      (orginalString?.split(" ").length - 1);
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
@@ -30,6 +32,7 @@ const CarRoad = memo(function CarRoad() {
     Object.keys(romPlData).forEach((item) => {
       if (romPlData[item].userName === userName) {
         setMyData(romPlData[item]);
+
         return;
       } else {
         romPlayersDataArray.push(romPlData[item]);
