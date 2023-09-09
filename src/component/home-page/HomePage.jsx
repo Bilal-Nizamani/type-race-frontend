@@ -19,7 +19,7 @@ const RaceGame = () => {
   );
   const userShareData = useSelector((state) => state.socketSharedData);
   const previousSocketSharedDataRef = useRef(currentSocketSharedData);
-
+  const [isWaiting, setIsWaiting] = useState(false);
   const dispatch = useDispatch();
 
   // race-text
@@ -109,6 +109,7 @@ const RaceGame = () => {
       setIsGameBeingPlayed(false);
       gameEnder(raceText, false);
       setIsCounting(true);
+      setIsWaiting(false);
     });
 
     socket.on("room_created", (roomConfirmation) => {
@@ -120,6 +121,10 @@ const RaceGame = () => {
       gameEnder("Time UP", true);
       setIsGameBeingPlayed(false);
       setIsRaceCompleted(false);
+    });
+
+    socket.on("waiting", () => {
+      setIsWaiting(true);
     });
 
     socket.on("game_completed", () => {
@@ -181,6 +186,16 @@ const RaceGame = () => {
         >
           {count}
         </div>
+        {isWaiting ? (
+          <div
+            className="text-white bg-black p-5 top-[3%] left-[30%] rounded-xl w-fit absolute
+     text-2xl font-bold"
+          >
+            Waiting for players....{" "}
+          </div>
+        ) : (
+          ""
+        )}
         <div className="text-center mt-8 text-2xl">
           <div
             id="text"
