@@ -52,6 +52,9 @@ const RaceInput = memo(function RaceInput({
         }, 100);
       }
     }
+    if (!isGameBeingPlayed) {
+      setCurrUserText("");
+    }
   }, [isGameBeingPlayed]);
 
   // * adding data gameplayData
@@ -74,10 +77,7 @@ const RaceInput = memo(function RaceInput({
     let isMatch1 = true;
 
     // cheking if user completed race
-    if (
-      originalStringArray.length === 1 &&
-      userInput === originalStringArray[0]
-    ) {
+    if (originalStringArray.join("") === userInput) {
       dispatch(
         addGamePlayData({
           arrayOfwrittenWords,

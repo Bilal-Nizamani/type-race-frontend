@@ -15,8 +15,8 @@ const GameTimer = memo(function GameTimer({ getTimer, isRaceCompleted }) {
 
   useEffect(() => {
     if (!isRaceCompleted) {
-      setTimer(10 - roomTimer);
-      getTimer(10 - roomTimer);
+      setTimer(200 - roomTimer);
+      getTimer(200 - roomTimer);
     }
   }, [getTimer, isRaceCompleted, roomTimer]);
 

@@ -9,6 +9,7 @@ import socket from "@/config/socket";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { addPlayingPlayersData } from "@/redux-store/features/roomConnectedPlayersDataSlice";
 import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
+import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import _isEqual from "lodash/isEqual";
 
 const RaceGame = () => {
@@ -75,6 +76,32 @@ const RaceGame = () => {
 
   const createRoomHandler = () => {
     socket.emit("user_ready_to_play", "i am wiaint");
+
+    dispatch(
+      addPlayingPlayersData({
+        myData: {
+          car: userShareData.car,
+          userName: userShareData.userName,
+          accuracy: 0,
+          finishingTime: "",
+          place: "1/4",
+          carPosition: 0,
+          arrayOfwrittenWords: "",
+          isRaceCompleted: false,
+        },
+      })
+    );
+
+    dispatch(
+      addUserShareData({
+        accuracy: 0,
+        finishingTime: "",
+        place: "1/4",
+        carPosition: 0,
+        arrayOfwrittenWords: "",
+        isRaceCompleted: false,
+      })
+    );
   };
 
   useEffect(() => {
