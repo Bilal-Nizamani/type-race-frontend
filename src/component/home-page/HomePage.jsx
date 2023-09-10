@@ -76,6 +76,7 @@ const RaceGame = () => {
 
   const createRoomHandler = () => {
     socket.emit("user_ready_to_play", "i am wiaint");
+    setIsRaceCompleted(false);
 
     dispatch(
       addPlayingPlayersData({
@@ -120,7 +121,7 @@ const RaceGame = () => {
       setGameEnd(true);
       gameEnder("Time UP", true);
       setIsGameBeingPlayed(false);
-      setIsRaceCompleted(false);
+      setIsRaceCompleted(true);
     });
 
     socket.on("waiting", () => {
@@ -191,7 +192,7 @@ const RaceGame = () => {
             className="text-white bg-black p-5 top-[3%] left-[30%] rounded-xl w-fit absolute
      text-2xl font-bold"
           >
-            Waiting for players....{" "}
+            Waiting for players....
           </div>
         ) : (
           ""
