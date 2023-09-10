@@ -75,139 +75,119 @@ const RaceInput = memo(function RaceInput({
   // Handle user input and compare with the original string
   const stringHandler = (userInput) => {
     let isMatch1 = true;
-
-    // cheking if user completed race
-    if (originalStringArray.join("") === userInput) {
-      dispatch(
-        addGamePlayData({
-          arrayOfwrittenWords,
-          originalStringArray,
-          wrongsLetters,
-          wrongWords,
-        })
-      );
-
-      const gameWinText = "You won";
-      setArrayOfwrittenWords(rightText);
-      setRightText([]);
-      setOriginalStringArray([]);
-      gameEnder(gameWinText, true);
-      setCurrText(gameWinText);
-      setCurrUserText("");
-      return;
-    }
-    if (
-      wrongText.length === 0 &&
-      userInput[userInput.length - 1] === " " &&
-      userInput.trimEnd() === originalStringArray[0]
-    ) {
-      // adding new logic here to check word by word
-      setArrayOfwrittenWords([...rightText]);
-      setCurrUserText("");
-      setCurrText(() => {
-        return manipulateStringNdColors(
-          modifyString(rightText, true),
-          orginalString,
-          0,
-          false
+    try {
+      // cheking if user completed race
+      if (originalStringArray.join("") === userInput) {
+        dispatch(
+          addGamePlayData({
+            arrayOfwrittenWords,
+            originalStringArray,
+            wrongsLetters,
+            wrongWords,
+          })
         );
-      });
 
-      setRightText((old) => {
-        const updatedRightText = [...old];
-        updatedRightText.pop();
-        updatedRightText.push(rmSpce(userInput));
-        updatedRightText.push("");
-        return updatedRightText;
-      });
-
-      setOriginalStringArray((oldVl) => {
-        const updatedOriginalStringArray = [...oldVl];
-        updatedOriginalStringArray.shift();
-        return updatedOriginalStringArray;
-      });
-      return;
-    } else if (wrongText.length > 0) {
-      wrongText = userInput;
-    }
-
-    for (let i = 0; i < userInput.length; i++) {
-      if (userInput[i] !== originalStringArray[0][i]) {
-        isMatch1 = false;
-        break;
+        const gameWinText = "You won";
+        setArrayOfwrittenWords(rightText);
+        setRightText([]);
+        setOriginalStringArray([]);
+        gameEnder(gameWinText, true);
+        setCurrText(gameWinText);
+        setCurrUserText("");
+        return;
       }
-    }
-    if (isMatch1) {
-      // Update the current user text
-      setCurrUserText(userInput);
+      if (
+        wrongText.length === 0 &&
+        userInput[userInput.length - 1] === " " &&
+        userInput.trimEnd() === originalStringArray[0]
+      ) {
+        // adding new logic here to check word by word
+        setArrayOfwrittenWords([...rightText]);
+        setCurrUserText("");
+        setCurrText(() => {
+          return manipulateStringNdColors(
+            modifyString(rightText, true),
+            orginalString,
+            0,
+            false
+          );
+        });
 
-      // Set the mistake deletion flag to true
-      setIsMistakeDeleted(true);
+        setRightText((old) => {
+          const updatedRightText = [...old];
+          updatedRightText.pop();
+          updatedRightText.push(rmSpce(userInput));
+          updatedRightText.push("");
+          return updatedRightText;
+        });
 
-      // Update the rightText array
-      const cleanedUserInput = rmSpce(userInput);
-      const rgtTxtLngt = rightText.length;
-      if (rgtTxtLngt > 0) {
-        rightText[rgtTxtLngt - 1] = cleanedUserInput;
-      } else {
-        rightText[rgtTxtLngt] = cleanedUserInput;
+        setOriginalStringArray((oldVl) => {
+          const updatedOriginalStringArray = [...oldVl];
+          updatedOriginalStringArray.shift();
+          return updatedOriginalStringArray;
+        });
+        return;
+      } else if (wrongText.length > 0) {
+        wrongText = userInput;
       }
 
-      // Update the currText state using manipulation functions
-      setCurrText(() =>
-        manipulateStringNdColors(
-          modifyString(rightText, false),
-          orginalString,
-          0,
-          false
-        )
-      );
-    } else {
-      const startWrongInx = rightText?.[rightText.length - 1]?.length ?? 0;
-      const wrongText = userInput.slice(startWrongInx);
-      if (wrongText.length <= 9) {
-        setCurrUserText(userInput);
-      } else return;
-
-      setWrongWords((old) => {
-        // Create a copy of the old state array
-        const updatedWords = [...old];
-        // Get the last word in the array
-        const lastWord = updatedWords[updatedWords.length - 1];
-        // Compare the last word with the original word
-        if (originalStringArray[0] !== lastWord) {
-          // Push the original word into the array if it's different
-          updatedWords.push(originalStringArray[0]);
+      for (let i = 0; i < userInput.length; i++) {
+        if (userInput[i] !== originalStringArray[0][i]) {
+          isMatch1 = false;
+          break;
         }
-        // Return the updated state
-        return updatedWords;
-      });
-      setWrongsLetters((prevState) => {
-        // Create a copy of the previous state array
-        const updatedState = [...prevState];
+      }
+      if (isMatch1) {
+        // Update the current user text
+        setCurrUserText(userInput);
 
-        // Check if the array is empty
-        if (updatedState.length === 0) {
-          // Push a new mistake object into the array
-          updatedState.push({
-            mistakeWord: originalStringArray[0],
-            mistakeLetters: wrongText,
-          });
-          // Return the updated state
-          return updatedState;
+        // Set the mistake deletion flag to true
+        setIsMistakeDeleted(true);
+
+        // Update the rightText array
+        const cleanedUserInput = rmSpce(userInput);
+        const rgtTxtLngt = rightText.length;
+        if (rgtTxtLngt > 0) {
+          rightText[rgtTxtLngt - 1] = cleanedUserInput;
         } else {
-          // Get the last mistake object from the array
-          let lastMistake = _.cloneDeep(updatedState[updatedState.length - 1]);
+          rightText[rgtTxtLngt] = cleanedUserInput;
+        }
 
-          // Check if the mistake word is the same as the original word
-          const isWordSame = lastMistake.mistakeWord === originalStringArray[0];
+        // Update the currText state using manipulation functions
+        setCurrText(() =>
+          manipulateStringNdColors(
+            modifyString(rightText, false),
+            orginalString,
+            0,
+            false
+          )
+        );
+      } else {
+        const startWrongInx = rightText?.[rightText.length - 1]?.length ?? 0;
+        const wrongText = userInput.slice(startWrongInx);
+        if (wrongText.length <= 9) {
+          setCurrUserText(userInput);
+        } else return;
 
-          // Check if the current wrongText is longer than the previous one
-          const isLongerMistake =
-            lastMistake.mistakeLetters.length < wrongText.length;
+        setWrongWords((old) => {
+          // Create a copy of the old state array
+          const updatedWords = [...old];
+          // Get the last word in the array
+          const lastWord = updatedWords[updatedWords.length - 1];
+          // Compare the last word with the original word
+          if (originalStringArray[0] !== lastWord) {
+            // Push the original word into the array if it's different
+            updatedWords.push(originalStringArray[0]);
+          }
+          // Return the updated state
+          return updatedWords;
+        });
+        setWrongsLetters((prevState) => {
+          // Create a copy of the previous state array
+          const updatedState = [...prevState];
 
-          // Check if a mistake was already deleted
-          if (isMistakeDeleted) {
+          // Check if the array is empty
+          if (updatedState.length === 0) {
             // Push a new mistake object into the array
             updatedState.push({
               mistakeWord: originalStringArray[0],
@@ -215,26 +195,52 @@ const RaceInput = memo(function RaceInput({
             });
             // Return the updated state
             return updatedState;
-          } else if (isWordSame && isLongerMistake) {
-            // Update the mistake letters in the last mistake object
-            lastMistake.mistakeLetters = wrongText;
-            // Return the updated state
-            return updatedState;
           } else {
-            // Return the original state as no changes are needed
-            return updatedState;
-          }
-        }
-      });
+            // Get the last mistake object from the array
+            let lastMistake = _.cloneDeep(
+              updatedState[updatedState.length - 1]
+            );
 
-      setCurrText(() => {
-        return manipulateStringNdColors(
-          wrongText,
-          orginalString,
-          modifyString(rightText, false).length,
-          true
-        );
-      });
+            // Check if the mistake word is the same as the original word
+            const isWordSame =
+              lastMistake.mistakeWord === originalStringArray[0];
+
+            // Check if the current wrongText is longer than the previous one
+            const isLongerMistake =
+              lastMistake.mistakeLetters.length < wrongText.length;
+
+            // Check if a mistake was already deleted
+            if (isMistakeDeleted) {
+              // Push a new mistake object into the array
+              updatedState.push({
+                mistakeWord: originalStringArray[0],
+                mistakeLetters: wrongText,
+              });
+              // Return the updated state
+              return updatedState;
+            } else if (isWordSame && isLongerMistake) {
+              // Update the mistake letters in the last mistake object
+              lastMistake.mistakeLetters = wrongText;
+              // Return the updated state
+              return updatedState;
+            } else {
+              // Return the original state as no changes are needed
+              return updatedState;
+            }
+          }
+        });
+
+        setCurrText(() => {
+          return manipulateStringNdColors(
+            wrongText,
+            orginalString,
+            modifyString(rightText, false).length,
+            true
+          );
+        });
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
