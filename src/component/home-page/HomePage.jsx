@@ -11,6 +11,7 @@ import { addPlayingPlayersData } from "@/redux-store/features/roomConnectedPlaye
 import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import _isEqual from "lodash/isEqual";
+import AllRoomPlayersScoreBoard from "./AllRoomPlayersScoreBoard";
 
 const RaceGame = () => {
   const currentSocketSharedData = useSelector(
@@ -26,6 +27,7 @@ const RaceGame = () => {
   const [currText, setCurrText] = useState("");
   const [gameEnd, setGameEnd] = useState(true);
   const [isRaceCompleted, setIsRaceCompleted] = useState(false);
+  const [isRoomGameEnded, setIsRoomGameEnded] = useState(false);
   // to show speed or not or reset car
   const [checkDataSend, setCheckDataSend] = useState(false);
 
@@ -77,6 +79,7 @@ const RaceGame = () => {
   const createRoomHandler = () => {
     socket.emit("user_ready_to_play", "i am wiaint");
     setIsRaceCompleted(false);
+    setIsRoomGameEnded(false);
 
     dispatch(
       addPlayingPlayersData({
@@ -122,6 +125,7 @@ const RaceGame = () => {
       gameEnder("Time UP", true);
       setIsGameBeingPlayed(false);
       setIsRaceCompleted(true);
+      setIsRoomGameEnded(true);
     });
 
     socket.on("waiting", () => {
@@ -133,6 +137,7 @@ const RaceGame = () => {
       gameEnder("Race Ended", true);
       setIsGameBeingPlayed(false);
       setIsRaceCompleted(true);
+      setIsRoomGameEnded(true);
     });
     socket.on("left_alone", () => {
       setCount(0);
@@ -222,6 +227,12 @@ const RaceGame = () => {
         >
           Play New
         </button>
+        {isRoomGameEnded && (
+          <AllRoomPlayersScoreBoard
+            isGameBeingPlayed={isGameBeingPlayed}
+            isRaceCompleted={isRaceCompleted}
+          />
+        )}
         {isRaceCompleted && <MyLineChart isRaceCompleted={isRaceCompleted} />}
       </div>
     </>
