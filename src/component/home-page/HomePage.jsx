@@ -1,247 +1,81 @@
 "use client";
 
-// Import necessary modules and components
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Counter from "./Counter";
 import CarRoad from "./CarRoad";
-import {
-  manipulateStringNdColors,
-  modifyString,
-  rmSpce,
-} from "@/utils/serviceFunction";
+import RaceInput from "./RaceInput";
 import MyLineChart from "./MyLineChart";
 import socket from "@/config/socket";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { addPlayingPlayersData } from "@/redux-store/features/roomConnectedPlayersDataSlice";
+import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
+import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import _isEqual from "lodash/isEqual";
-
-// Sample texts for the race game
-const texts = [
-  "This will start a new test in custom mode. Words that you mistyped more often or words that you typed much slower will be weighted higher and appear more often.",
-];
+import AllRoomPlayersScoreBoard from "./AllRoomPlayersScoreBoard";
 
 const RaceGame = () => {
   const currentSocketSharedData = useSelector(
     (state) => state.socketSharedData,
     shallowEqual
   );
-  const userShareData = useSelector((state) => state.addUserShareData);
-
+  const userShareData = useSelector((state) => state.socketSharedData);
   const previousSocketSharedDataRef = useRef(currentSocketSharedData);
-
+  const [isWaiting, setIsWaiting] = useState(false);
   const dispatch = useDispatch();
 
+  // race-text
   const [currText, setCurrText] = useState("");
-  // userTExt
-  const [currUserText, setCurrUserText] = useState("");
-  // gameend or not
   const [gameEnd, setGameEnd] = useState(true);
   const [isRaceCompleted, setIsRaceCompleted] = useState(false);
+  const [roomGameState, setRoomGameState] = useState("not-started");
   // to show speed or not or reset car
+  const [checkDataSend, setCheckDataSend] = useState(false);
 
-  // completed-game or Not;
-  // start-game-counting
-  const [count, setCount] = useState(2);
+  const [count, setCount] = useState(0);
   const [isCounting, setIsCounting] = useState(false);
-  // array of right writen words
-  const [rightText, setRightText] = useState([]);
-  const [arrayOfwrittenWords, setArrayOfwrittenWords] = useState([]);
 
-  // wrong writen words nd letters
-  let wrongText = "";
-  // stringOfwrongLetters
-  const [wrongsLetters, setWrongsLetters] = useState([]);
-  // array of wrongWrods
-  const [wrongWords, setWrongWords] = useState([]);
-  //
-  const [orginalString, setOrginalString] = useState("");
-  // array of strings
-  const [originalStringArray, setOriginalStringArray] = useState([]);
-  const [isMistakeDeleted, setIsMistakeDeleted] = useState(false);
   const [isGameBeingPlayed, setIsGameBeingPlayed] = useState(false);
-  const inputRef = useRef(null);
-
-  // Start the game countdown
-  const endPrvGame = () => {};
-  const startCounting = useCallback(() => {
-    const raceText = texts[Math.floor(Math.random() * texts.length)];
-    setCurrText(raceText);
-    setOrginalString(raceText);
-    setOriginalStringArray(raceText.split(" "));
-    gameEnder(raceText, false);
-
-    setCurrUserText("");
-    setArrayOfwrittenWords([]);
-    setIsCounting(true);
-    setCount(2); // Reset count to 5 when starting again
-    setRightText([]);
-    setWrongsLetters([]);
-    setWrongWords([]);
-  }, []);
-
-  // Handle the completion of countdown
-  const countingCompleted = useCallback(() => {
-    if (inputRef.current) {
-      setTimeout(() => {
-        inputRef.current.focus(); // Focus on the input element after a short delay
-      }, 100);
-    }
-    socket.emit("game_started", {});
-
-    setGameEnd(false);
-  }, [inputRef]);
 
   // End the game
-  const gameEnder = (startingGameText, checkIsGameComplete) => {
-    setCurrText(startingGameText);
+  const gameEnder = useCallback((startingGameText, checkIsGameComplete) => {
     setGameEnd(true);
     setIsGameBeingPlayed(false);
-    setCurrUserText("");
     setIsRaceCompleted(checkIsGameComplete);
+    setCurrText(startingGameText);
+  }, []);
+  const changeDatatoDefault = () => {
+    dispatch(addPlayingPlayersData({}));
+    dispatch(
+      addUserShareData({
+        accuracy: 0,
+        finishingTime: "",
+        carPosition: 0,
+        arrayOfwrittenWords: "",
+        isRaceCompleted: false,
+      })
+    );
   };
 
-  // Handle user input and compare with the original string
-  const stringHandler = (userInput) => {
-    let isMatch1 = true;
+  const getCurrText = useCallback((text) => {
+    setCurrText(text);
+  }, []);
 
-    // cheking if user completed race
+  const createRoomHandler = () => {
     if (
-      originalStringArray.length === 1 &&
-      userInput === originalStringArray[0]
+      isWaiting ||
+      isCounting ||
+      isGameBeingPlayed ||
+      roomGameState === "started"
     ) {
-      const gameWinText = "You won";
-      setArrayOfwrittenWords(rightText);
-      setRightText([]);
-      setOriginalStringArray([]);
-
-      gameEnder(gameWinText, true);
-
-      return;
-    }
-    if (
-      wrongText.length === 0 &&
-      userInput[userInput.length - 1] === " " &&
-      userInput.trimEnd() === originalStringArray[0]
-    ) {
-      // adding new logic here to check word by word
-      setArrayOfwrittenWords([...rightText]);
-      setCurrUserText("");
-
-      setCurrText(() => {
-        return manipulateStringNdColors(
-          modifyString(rightText, true),
-          orginalString,
-          0,
-          false
-        );
-      });
-
-      setRightText((old) => {
-        old.pop();
-        old.push(rmSpce(userInput));
-        old.push("");
-        return old;
-      });
-      setOriginalStringArray((oldVl) => {
-        oldVl.shift();
-        return oldVl;
-      });
-      return;
-    } else if (wrongText.length > 0) {
-      wrongText = userInput;
-    }
-
-    for (let i = 0; i < userInput.length; i++) {
-      if (userInput[i] !== originalStringArray[0][i]) {
-        isMatch1 = false;
-        break;
-      }
-    }
-    if (isMatch1) {
-      setCurrUserText(userInput);
-
-      setIsMistakeDeleted(true);
-      let rgtTxtLngt = rightText.length;
-      rgtTxtLngt > 0
-        ? (rightText[rgtTxtLngt - 1] = rmSpce(userInput))
-        : (rightText[rgtTxtLngt] = rmSpce(userInput));
-
-      setCurrText(() => {
-        return manipulateStringNdColors(
-          modifyString(rightText, false),
-          orginalString,
-          0,
-          false
-        );
-      });
+      socket.emit("leave_room", " leave the room");
     } else {
-      let startWrongInx = rightText[rightText?.length - 1]?.length;
-      startWrongInx = startWrongInx === undefined ? 0 : startWrongInx;
-      wrongText = userInput.slice(startWrongInx);
-
-      if (wrongText.length > 9) {
-        return;
-      } else {
-        setCurrUserText(userInput);
-      }
-      setWrongWords((oldVal) => {
-        originalStringArray[0] === oldVal[oldVal.length - 1]
-          ? oldVal
-          : oldVal.push(originalStringArray[0]);
-        return oldVal;
-      });
-      setWrongsLetters((prevState) => {
-        if (prevState.length < 1) {
-          setIsMistakeDeleted(false);
-
-          prevState.push({
-            mistakeWord: originalStringArray[0],
-            mistakeLetters: wrongText,
-          });
-          return prevState;
-        } else {
-          const lstMmitake = prevState[prevState.length - 1];
-          const isWordSame = lstMmitake.mistakeWord === originalStringArray[0];
-          const condition = lstMmitake.mistakeLetters.length < wrongText.length;
-          if (condition && isWordSame) {
-            setIsMistakeDeleted(false);
-
-            prevState[prevState.length - 1].mistakeLetters = wrongText;
-            return prevState;
-          } else if (isMistakeDeleted) {
-            prevState.push({
-              mistakeWord: originalStringArray[0],
-              mistakeLetters: wrongText,
-            });
-            return prevState;
-          } else return prevState;
-        }
-      });
-
-      setCurrText(() => {
-        return manipulateStringNdColors(
-          wrongText,
-          orginalString,
-          modifyString(rightText, false).length,
-          true
-        );
-      });
+      socket.emit("user_ready_to_play", "i am want");
     }
+    setIsRaceCompleted(false);
+    setRoomGameState("started");
+    changeDatatoDefault();
   };
 
-  // Handle user input change
-  const handleInput = (e) => {
-    const text = e.target.value;
-    stringHandler(text);
-  };
-
-  // Prevent pasting in the input field
-  const handlePast = (e) => {
-    e.preventDefault();
-  };
-
-  // socket.io implemeteion
-  // send data if game is palying
   useEffect(() => {
     // if cheking if value is not he same when sending socket data
     if (
@@ -249,38 +83,44 @@ const RaceGame = () => {
         currentSocketSharedData,
         previousSocketSharedDataRef.current
       ) &&
-        isGameBeingPlayed) ||
+        checkDataSend) ||
       isCounting
     ) {
       socket.emit("player_data", currentSocketSharedData);
     }
 
+    setCheckDataSend(isGameBeingPlayed);
+
     // Update the previousSocketSharedDataRef to the current value
     previousSocketSharedDataRef.current = currentSocketSharedData;
-  }, [currentSocketSharedData, isGameBeingPlayed, isCounting]);
+  }, [currentSocketSharedData, isGameBeingPlayed, isCounting, checkDataSend]);
 
   useEffect(() => {
     if (isCounting || isGameBeingPlayed) {
       socket.on("room_players_data", (playersData) => {
         const upDatedPlayers = playersData;
-        const myDataKey = Object.keys(playersData).find(
-          (key) => playersData[key].userName === userShareData?.userName
-        );
-        if (myDataKey !== undefined) delete upDatedPlayers[myDataKey];
         dispatch(addPlayingPlayersData(upDatedPlayers));
       });
     }
   }, [isGameBeingPlayed, isCounting, dispatch, userShareData]);
 
-  const createRoomHandler = () => {
-    socket.emit("user_ready_to_play", "i am wiaint");
-  };
-
   useEffect(() => {
-    socket.on("match_found", (room) => {
-      console.log("found this ", room);
-      startCounting(true);
+    socket.on("match_found", (raceText) => {
       setIsGameBeingPlayed(false);
+      gameEnder(raceText, false);
+      setIsCounting(true);
+      setIsWaiting(false);
+    });
+    socket.on("room_left", () => {
+      setIsWaiting(false);
+      setGameEnd(true);
+      setIsCounting(false);
+      setIsGameBeingPlayed(false);
+      setCount(0);
+      setIsRaceCompleted(false);
+      setCurrText("");
+      changeDatatoDefault();
+      setRoomGameState("not-started");
     });
 
     socket.on("room_created", (roomConfirmation) => {
@@ -290,57 +130,88 @@ const RaceGame = () => {
     socket.on("time_up", () => {
       setGameEnd(true);
       gameEnder("Time UP", true);
+      setIsGameBeingPlayed(false);
+      setIsRaceCompleted(true);
+      setRoomGameState("ended");
     });
 
-    // Clean up the socket connection on component unmount
-    return () => {
-      socket.of("room_created");
-      socket.of("match_found");
-      socket.of("time_up");
-      socket.disconnect();
-    };
-  }, [startCounting]);
+    socket.on("waiting", () => {
+      setIsWaiting(true);
+    });
 
-  // Start the game timer
-  useEffect(() => {
-    if (isCounting && count > 0) {
-      const timer = setTimeout(() => {
-        setCount((prevCount) => prevCount - 1);
-      }, 1000);
+    socket.on("game_completed", () => {
+      setGameEnd(true);
+      gameEnder("Race Ended", true);
+      setIsGameBeingPlayed(false);
+      setIsRaceCompleted(true);
+      setRoomGameState("ended");
+    });
+    socket.on("left_alone", () => {
+      setCount(0);
+      setCheckDataSend(true);
+      changeDatatoDefault();
+      setIsWaiting(true);
+    });
 
-      return () => clearTimeout(timer);
-    } else if (isCounting && count === 0) {
-      countingCompleted();
+    socket.on("countdown_timer", (countTimer) => {
+      setCount(countTimer);
+      setCheckDataSend(true);
+    });
+
+    socket.on("counting_completed", () => {
       setIsCounting(false);
       setIsGameBeingPlayed(true);
-    }
-  }, [count, isCounting, countingCompleted]);
+      socket.emit("game_started", {});
+      setGameEnd(false);
+      setCount(0);
+    });
+    // Clean up the socket connection on component unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, [gameEnder]);
+
+  useEffect(() => {
+    dispatch(
+      addGamePlayData({
+        isCounting,
+        isGameBeingPlayed,
+        gameEnd,
+        isRaceCompleted,
+      })
+    );
+  }, [isCounting, isGameBeingPlayed, gameEnd, isRaceCompleted, dispatch]);
 
   return (
     <>
-      <div className="relative bg-gray-100 p-8 flex flex-col  2xl:w-[1300px] md:w-[500px] lg:w-[1000px] justify-center">
+      <div className="relative bg-gray-900 text-white p-8 flex flex-col  2xl:w-[1300px] md:w-[700px] lg:w-[1000px] justify-center">
         <div
-          className="absolute top-8 left-[45%] text-3xl font-semibold"
+          className="  text-3xl text-center -mt-5 mb-3 font-semibold"
           id="title"
         >
           Typing Game
         </div>
 
-        <CarRoad
-          rightText={rightText}
-          orginalString={orginalString}
-          isCounting={isCounting}
-          arrayOfwrittenWords={arrayOfwrittenWords}
-        />
+        <CarRoad />
         <div
           className={`${
             count < 1 ? "hidden" : ""
-          }   text-white bg-black p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
+          }   text-white bg-black  p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
      text-4xl font-bold`}
         >
           {count}
         </div>
-        <div className="text-center mt-8 text-2xl">
+        {isWaiting ? (
+          <div
+            className="text-white bg-gray-800 shadow-md shadow-white p-5 top-[7%] left-[35%] rounded-xl w-fit absolute
+     text-2xl font-bold"
+          >
+            Waiting for players....
+          </div>
+        ) : (
+          ""
+        )}
+        <div className="text-center mt-8 text-3xl">
           <div
             id="text"
             dangerouslySetInnerHTML={{ __html: currText }}
@@ -348,27 +219,13 @@ const RaceGame = () => {
           ></div>
         </div>
         <div className="flex flex-col items-center justify-center ">
-          <input
-            ref={inputRef}
-            type="text"
-            disabled={gameEnd}
-            onPaste={handlePast}
-            value={currUserText}
-            onChange={handleInput}
-            className={`p-2 border-2 border-gray-900 w-96 mx-2 ${
-              gameEnd ? "border-[1px] select-none pointer-events-none" : ""
-            }`}
-          />
-          <Counter
+          <RaceInput
             gameEnd={gameEnd}
-            rightText={rightText}
-            arrayOfwrittenWords={arrayOfwrittenWords}
-            isCounting={isCounting}
-            wrongsLetters={wrongsLetters}
-            orginalString={orginalString}
-            isRaceCompleted={isRaceCompleted}
             gameEnder={gameEnder}
+            getCurrText={getCurrText}
+            isGameBeingPlayed={isGameBeingPlayed}
           />
+          <Counter />
         </div>
         <button
           className="mt-2 p-3 px-5 text-[1.5rem] mx-auto  bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -377,27 +234,20 @@ const RaceGame = () => {
           }}
           onClick={createRoomHandler}
         >
-          Play New
+          {isWaiting ||
+          isCounting ||
+          isGameBeingPlayed ||
+          roomGameState === "started"
+            ? "Leave Game"
+            : "Play New"}
         </button>
-        {gameEnd && (
-          <div className=" shadow-md my-5">
-            {" "}
-            <div className="text-center text-3xl ">Mistakes </div>
-            <div className="mt-4 flex gap-6 justify-center flex-wrap  ">
-              {wrongWords.map((wrongWord, index) => {
-                return (
-                  <div
-                    key={index}
-                    className="flex-[30%] text-[18px] px-1 font-semibold bg-blue-100 text-red-700"
-                  >
-                    {wrongWord}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        {roomGameState === "ended" && (
+          <AllRoomPlayersScoreBoard
+            isGameBeingPlayed={isGameBeingPlayed}
+            isRaceCompleted={isRaceCompleted}
+          />
         )}
-        <MyLineChart isRaceCompleted={isRaceCompleted} />
+        {isRaceCompleted && <MyLineChart isRaceCompleted={isRaceCompleted} />}
       </div>
     </>
   );

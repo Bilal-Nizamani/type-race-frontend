@@ -1,54 +1,75 @@
-import React, { useEffect, useState, useRef } from "react";
-import car_img from '../../../public/jeep.png'
-import Image from "next/image";
-import { useDispatch,useSelector } from "react-redux";
+"use client";
+import React, { memo, useEffect, useState } from "react";
+
+import { useDispatch, useSelector } from "react-redux";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
-const CarRoad = ({
-  orginalString,
-  arrayOfwrittenWords,
-}) => {
-  const dispatch = useDispatch()
-  orginalString = orginalString.split(" ");
-  const [carPosition, setCarPosition] = useState(0);
-  const romPlData = useSelector((state) => state.roomConnectedPlayersData)
-  const [otherPlayersData, setOtherPlayersData] = useState()
+import CarComponent from "./CarComponent";
+import Image from "next/image";
 
-  const carRoad = useRef(null);
+const CarRoad = memo(function CarRoad() {
+  const dispatch = useDispatch();
+  const [myData, setMyData] = useState({ carPosition: 0 });
+  const [otherPlayersData, setOtherPlayersData] = useState([]);
+  const romPlData = useSelector((state) => state.roomConnectedPlayersData);
+  const gameData = useSelector((state) => state.gamePlayData);
+  const socketSharedData = useSelector((state) => state.socketSharedData);
+  const { arrayOfwrittenWords, orginalString } = gameData;
+  const { userName, car } = socketSharedData;
+
   useEffect(() => {
-    const roadWidth = carRoad.current.offsetWidth;
-    const writtenTextPercent = (arrayOfwrittenWords.length * 100) / orginalString.length;
+    const writtenTextPercent =
+      (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
 
+    console.log(writtenTextPercent);
     if (writtenTextPercent > 0) {
-      setCarPosition((roadWidth - 70) * (writtenTextPercent / 100));
-      dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }))
-      
-    } else {
-      setCarPosition(0);
+      dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
-  }, [orginalString.length, dispatch, arrayOfwrittenWords.length,]);
+  }, [dispatch, arrayOfwrittenWords, orginalString]);
 
   useEffect(() => {
-    console.log(romPlData)
-    setOtherPlayersData(romPlData)
-    
-  }, [romPlData])
-  
+    const romPlayersDataArray = [];
+    Object.keys(romPlData).forEach((item) => {
+      if (romPlData[item].userName === userName) {
+        setMyData(romPlData[item]);
 
+        return;
+      } else {
+        romPlayersDataArray.push(romPlData[item]);
+      }
+    });
+
+    setOtherPlayersData(romPlayersDataArray);
+  }, [romPlData, userName]);
 
   return (
-    <div className="min-h-[160px] relative   bg-gray-300">
-      <div ref={carRoad} className="h-1  w-full  bg-gray-700 absolute top-[35%] transform -translate-y-1/2">
+    <div
+      style={{
+        height: (otherPlayersData?.length + 1) * 80 + "px",
+      }}
+      className=" flex justify-around gap-3 pb-1 transform  transition-transform bg-gray-700  flex-col shadow-t-md shadow-md shadow-white "
+    >
+      <div className="h-3  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
         <div
-          style={{ left: `${carPosition}px` }}
-          className=" w-12   absolute -top-1/2 transform -translate-y-1/2 rounded-md text-white flex items-center justify-center transition-all duration-300 ease-in-out"
+          style={{
+            marginLeft: `calc(${myData.carPosition * 100}% - 70px)`,
+          }}
+          className=" w-16  transition-all duration-300 ease-in-out"
         >
-        <div className="mt-[-2rem]">
-         <Image src={car_img} alt=""/>
-         </div>
+          <div className="mt-[-3rem]">
+            <Image
+              width={100}
+              height={100}
+              src={`/${car}.png`}
+              alt="asdfasdf"
+            />
+          </div>
         </div>
       </div>
+      {otherPlayersData?.map((item) => {
+        return <CarComponent key={item.userName} userData={item} />;
+      })}
     </div>
   );
-};
+});
 
 export default CarRoad;
