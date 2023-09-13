@@ -1,21 +1,16 @@
-import { createSlice, } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 // data that would would shared through socket.io when game is being played
-const initialState = {
-
-
-}
+const initialState = {};
 
 export const roomConnectedPlayersDataSlice = createSlice({
-    name:'auth',
-    initialState,
-    reducers:{
-        addPlayingPlayersData:(state, action)=>{
-                return  {...action.payload}
-        },
- 
-    }
+  name: "Room players data",
+  initialState,
+  reducers: {
+    addPlayingPlayersData: (state, action) => {
+      return { ...action.payload };
+    },
+  },
+});
 
-})
-
-export const {addPlayingPlayersData} = roomConnectedPlayersDataSlice.actions
-export default roomConnectedPlayersDataSlice.reducer
+export const { addPlayingPlayersData } = roomConnectedPlayersDataSlice.actions;
+export default roomConnectedPlayersDataSlice.reducer;

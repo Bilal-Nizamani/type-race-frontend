@@ -36,12 +36,12 @@ const Counter = memo(function Counter() {
     orginalString,
     arrayOfwrittenWords,
     isCounting,
+    isGameBeingPlayed,
   } = gameData;
 
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
-  const secondsArray = useRef([]);
-
+  const secondsArray = useRef(new Set());
   const wpmArray = useRef([]);
 
   const getTimer = useCallback((seconds) => {
@@ -50,7 +50,7 @@ const Counter = memo(function Counter() {
 
   useEffect(() => {
     if (!gameEnd) {
-      secondsArray.current.push(speedTestTimer + 1);
+      secondsArray.current.add(speedTestTimer + 1);
       wpmArray.current.push(serverWpm);
     }
   }, [gameEnd, speedTestTimer, serverWpm]);
@@ -74,7 +74,7 @@ const Counter = memo(function Counter() {
         })
       );
       setAccuracy(0);
-      secondsArray.current = [];
+      secondsArray.current = new Set();
       wpmArray.current = [];
     }
   }, [isCounting, dispatch]); // Added all Gthe relevant set functions as dependencies
@@ -82,9 +82,12 @@ const Counter = memo(function Counter() {
   useEffect(() => {
     if (isRaceCompleted) {
       let totalMistakes = 0;
-      wrongsLetters?.forEach((item) => {
-        totalMistakes += item.mistakeLetters.length;
-      });
+      if (wrongsLetters?.length > 0) {
+        wrongsLetters?.forEach((item) => {
+          totalMistakes += item.mistakeLetters.length;
+        });
+      }
+
       const accuracyPercent = Math.floor(
         ((orginalString.length - totalMistakes) / orginalString.length) * 100
       );
@@ -107,12 +110,11 @@ const Counter = memo(function Counter() {
           wpm: serverWpm,
           givenString: orginalString,
           writenString: rightText,
-          secondsArray: secondsArray.current,
+          secondsArray: Array.from(secondsArray.current),
           typeTime: speedTestTimer,
           accuracy: accuracyPercent,
           gameType: "normal",
           mistakesArray: wrongsLetters,
-          place: "1/4",
         })
       );
     }
@@ -120,9 +122,12 @@ const Counter = memo(function Counter() {
 
   return (
     <>
-      <GameTimer getTimer={getTimer} isRaceCompleted={isRaceCompleted} />
-
-      <div className="bg-gray-100 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
+      <GameTimer
+        getTimer={getTimer}
+        isGameBeingPlayed={isGameBeingPlayed}
+        isRaceCompleted={isRaceCompleted}
+      />
+      <div className="bg-gray-300 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
         <span className="text-lg font-semibold text-blue-500">
           WPM: {serverWpm}
         </span>

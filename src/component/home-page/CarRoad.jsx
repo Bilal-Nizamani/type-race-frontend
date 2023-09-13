@@ -20,6 +20,7 @@ const CarRoad = memo(function CarRoad() {
     const writtenTextPercent =
       (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
 
+    console.log(writtenTextPercent);
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
@@ -30,6 +31,7 @@ const CarRoad = memo(function CarRoad() {
     Object.keys(romPlData).forEach((item) => {
       if (romPlData[item].userName === userName) {
         setMyData(romPlData[item]);
+
         return;
       } else {
         romPlayersDataArray.push(romPlData[item]);
@@ -42,23 +44,27 @@ const CarRoad = memo(function CarRoad() {
   return (
     <div
       style={{
-        height: (otherPlayersData?.length + 1) * 70 + "px",
+        height: (otherPlayersData?.length + 1) * 80 + "px",
       }}
-      className=" flex justify-around gap-14 pb-1  flex-col bg-slate-800   border-[5px]"
+      className=" flex justify-around gap-3 pb-1 transform  transition-transform bg-gray-700  flex-col shadow-t-md shadow-md shadow-white "
     >
-      <div className="h-4  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
+      <div className="h-3  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
         <div
           style={{
             marginLeft: `calc(${myData.carPosition * 100}% - 70px)`,
           }}
-          className=" w-12  transition-all duration-300 ease-in-out"
+          className=" w-16  transition-all duration-300 ease-in-out"
         >
-          <div className="mt-[-2rem]">
-            <Image width={50} height={40} src={`/${car}.png`} alt="asdfasdf" />
+          <div className="mt-[-3rem]">
+            <Image
+              width={100}
+              height={100}
+              src={`/${car}.png`}
+              alt="asdfasdf"
+            />
           </div>
         </div>
       </div>
-
       {otherPlayersData?.map((item) => {
         return <CarComponent key={item.userName} userData={item} />;
       })}

@@ -3,27 +3,40 @@
 import { useEffect, useState, memo } from "react";
 import socket from "@/config/socket";
 
-const GameTimer = memo(function GameTimer({ getTimer, isRaceCompleted }) {
-  const [timer, setTimer] = useState(0); // Timer in seconds
-  const [roomTimer, setRoomTimer] = useState(0);
+const GameTimer = memo(function GameTimer({
+  getTimer,
+  isGameBeingPlayed,
+  isRaceCompleted,
+}) {
+  const [roomTimer, setRoomTimer] = useState(200);
 
   useEffect(() => {
     socket.on("timer_update", (timerUpdate) => {
+      console.log(timerUpdate);
       setRoomTimer(timerUpdate);
     });
-  }, []);
+
+    socket.on("room_left", () => {
+      setRoomTimer(200);
+    });
+  }, [getTimer]);
 
   useEffect(() => {
     if (!isRaceCompleted) {
-      setTimer(300 - roomTimer);
-      getTimer(300 - roomTimer);
+      getTimer(200 - roomTimer);
     }
   }, [getTimer, isRaceCompleted, roomTimer]);
 
   return (
-    <div>
-      <div className="mb-4 text-gray-600">Given Time: {roomTimer} seconds</div>
-      <div className="text-3xl font-bold mb-6">Timer: {timer}s</div>
+    <div className="flex justify-between">
+      <div
+        style={{
+          color: roomTimer < 10 && isGameBeingPlayed ? "red" : "gray",
+        }}
+        className="text-2xl  mb-6"
+      >
+        {roomTimer}
+      </div>
     </div>
   );
 });

@@ -9,8 +9,9 @@ const ComponentContainer = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const userName = "guest" + Math.random();
-    const car = Math.floor(Math.random() * 6) + 1;
+    const randomNumbers = Math.floor(10000 + Math.random() * 90000); // Generates a random 5-digit number
+    const userName = "guest" + randomNumbers;
+    const car = Math.floor(Math.random() * 5) + 1;
     dispatch(addUserShareData({ userName: userName, car: car }));
   }, [dispatch]);
 
