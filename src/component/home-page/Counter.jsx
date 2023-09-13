@@ -36,6 +36,7 @@ const Counter = memo(function Counter() {
     orginalString,
     arrayOfwrittenWords,
     isCounting,
+    isGameBeingPlayed,
   } = gameData;
 
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
@@ -114,7 +115,6 @@ const Counter = memo(function Counter() {
           accuracy: accuracyPercent,
           gameType: "normal",
           mistakesArray: wrongsLetters,
-          place: "1/4",
         })
       );
     }
@@ -122,9 +122,12 @@ const Counter = memo(function Counter() {
 
   return (
     <>
-      <GameTimer getTimer={getTimer} isRaceCompleted={isRaceCompleted} />
-
-      <div className="bg-gray-100 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
+      <GameTimer
+        getTimer={getTimer}
+        isGameBeingPlayed={isGameBeingPlayed}
+        isRaceCompleted={isRaceCompleted}
+      />
+      <div className="bg-gray-300 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
         <span className="text-lg font-semibold text-blue-500">
           WPM: {serverWpm}
         </span>

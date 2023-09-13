@@ -27,7 +27,7 @@ const RaceGame = () => {
   const [currText, setCurrText] = useState("");
   const [gameEnd, setGameEnd] = useState(true);
   const [isRaceCompleted, setIsRaceCompleted] = useState(false);
-  const [isRoomGameEnded, setIsRoomGameEnded] = useState(false);
+  const [roomGameState, setRoomGameState] = useState("not-started");
   // to show speed or not or reset car
   const [checkDataSend, setCheckDataSend] = useState(false);
 
@@ -43,10 +43,38 @@ const RaceGame = () => {
     setIsRaceCompleted(checkIsGameComplete);
     setCurrText(startingGameText);
   }, []);
+  const changeDatatoDefault = () => {
+    dispatch(addPlayingPlayersData({}));
+    dispatch(
+      addUserShareData({
+        accuracy: 0,
+        finishingTime: "",
+        carPosition: 0,
+        arrayOfwrittenWords: "",
+        isRaceCompleted: false,
+      })
+    );
+  };
 
   const getCurrText = useCallback((text) => {
     setCurrText(text);
   }, []);
+
+  const createRoomHandler = () => {
+    if (
+      isWaiting ||
+      isCounting ||
+      isGameBeingPlayed ||
+      roomGameState === "started"
+    ) {
+      socket.emit("leave_room", " leave the room");
+    } else {
+      socket.emit("user_ready_to_play", "i am want");
+    }
+    setIsRaceCompleted(false);
+    setRoomGameState("started");
+    changeDatatoDefault();
+  };
 
   useEffect(() => {
     // if cheking if value is not he same when sending socket data
@@ -76,44 +104,23 @@ const RaceGame = () => {
     }
   }, [isGameBeingPlayed, isCounting, dispatch, userShareData]);
 
-  const createRoomHandler = () => {
-    socket.emit("user_ready_to_play", "i am wiaint");
-    setIsRaceCompleted(false);
-    setIsRoomGameEnded(false);
-
-    dispatch(
-      addPlayingPlayersData({
-        myData: {
-          car: userShareData.car,
-          userName: userShareData.userName,
-          accuracy: 0,
-          finishingTime: "",
-          place: "1/4",
-          carPosition: 0,
-          arrayOfwrittenWords: "",
-          isRaceCompleted: false,
-        },
-      })
-    );
-
-    dispatch(
-      addUserShareData({
-        accuracy: 0,
-        finishingTime: "",
-        place: "1/4",
-        carPosition: 0,
-        arrayOfwrittenWords: "",
-        isRaceCompleted: false,
-      })
-    );
-  };
-
   useEffect(() => {
     socket.on("match_found", (raceText) => {
       setIsGameBeingPlayed(false);
       gameEnder(raceText, false);
       setIsCounting(true);
       setIsWaiting(false);
+    });
+    socket.on("room_left", () => {
+      setIsWaiting(false);
+      setGameEnd(true);
+      setIsCounting(false);
+      setIsGameBeingPlayed(false);
+      setCount(0);
+      setIsRaceCompleted(false);
+      setCurrText("");
+      changeDatatoDefault();
+      setRoomGameState("not-started");
     });
 
     socket.on("room_created", (roomConfirmation) => {
@@ -125,7 +132,7 @@ const RaceGame = () => {
       gameEnder("Time UP", true);
       setIsGameBeingPlayed(false);
       setIsRaceCompleted(true);
-      setIsRoomGameEnded(true);
+      setRoomGameState("ended");
     });
 
     socket.on("waiting", () => {
@@ -137,11 +144,13 @@ const RaceGame = () => {
       gameEnder("Race Ended", true);
       setIsGameBeingPlayed(false);
       setIsRaceCompleted(true);
-      setIsRoomGameEnded(true);
+      setRoomGameState("ended");
     });
     socket.on("left_alone", () => {
       setCount(0);
       setCheckDataSend(true);
+      changeDatatoDefault();
+      setIsWaiting(true);
     });
 
     socket.on("countdown_timer", (countTimer) => {
@@ -175,9 +184,9 @@ const RaceGame = () => {
 
   return (
     <>
-      <div className="relative bg-gray-100 p-8 flex flex-col  2xl:w-[1300px] md:w-[500px] lg:w-[1000px] justify-center">
+      <div className="relative bg-gray-900 text-white p-8 flex flex-col  2xl:w-[1300px] md:w-[700px] lg:w-[1000px] justify-center">
         <div
-          className="absolute top-0 left-[45%] text-3xl font-semibold"
+          className="  text-3xl text-center -mt-5 mb-3 font-semibold"
           id="title"
         >
           Typing Game
@@ -187,14 +196,14 @@ const RaceGame = () => {
         <div
           className={`${
             count < 1 ? "hidden" : ""
-          }   text-white bg-black p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
+          }   text-white bg-black  p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
      text-4xl font-bold`}
         >
           {count}
         </div>
         {isWaiting ? (
           <div
-            className="text-white bg-black p-5 top-[3%] left-[30%] rounded-xl w-fit absolute
+            className="text-white bg-gray-800 shadow-md shadow-white p-5 top-[7%] left-[35%] rounded-xl w-fit absolute
      text-2xl font-bold"
           >
             Waiting for players....
@@ -202,7 +211,7 @@ const RaceGame = () => {
         ) : (
           ""
         )}
-        <div className="text-center mt-8 text-2xl">
+        <div className="text-center mt-8 text-3xl">
           <div
             id="text"
             dangerouslySetInnerHTML={{ __html: currText }}
@@ -225,9 +234,14 @@ const RaceGame = () => {
           }}
           onClick={createRoomHandler}
         >
-          Play New
+          {isWaiting ||
+          isCounting ||
+          isGameBeingPlayed ||
+          roomGameState === "started"
+            ? "Leave Game"
+            : "Play New"}
         </button>
-        {isRoomGameEnded && (
+        {roomGameState === "ended" && (
           <AllRoomPlayersScoreBoard
             isGameBeingPlayed={isGameBeingPlayed}
             isRaceCompleted={isRaceCompleted}

@@ -5,7 +5,7 @@ const initialState = {
   userName: "",
   accuracy: 0,
   finishingTime: "",
-  place: "1/4",
+  place: null,
   carPosition: 0,
   arrayOfwrittenWords: "",
   isRaceCompleted: false,

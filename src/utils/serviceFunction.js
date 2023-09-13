@@ -45,4 +45,27 @@ function modifyString(inputArray, isLast) {
 function rmSpce(inputString) {
   return inputString.replace(/ /g, "");
 }
-export { manipulateStringNdColors, modifyString, rmSpce };
+
+/// that select lower  average of 30 value to the length of array
+// works only for numbers
+function processArray(arr) {
+  if (arr.length < 31) return arr;
+  const firstValue = arr[0];
+  const lastValue = arr[arr.length - 1];
+
+  // Calculate the step size to select average numbers between the first and last values
+  const stepSize = (lastValue - firstValue) / 29;
+
+  const shortenedArr = [firstValue]; // Start with the first value
+
+  // Iterate through the array and select average numbers
+  for (let i = 1; i < 29; i++) {
+    const average = firstValue + stepSize * i;
+    shortenedArr.push(arr[Math.floor(average)]);
+  }
+
+  shortenedArr.push(lastValue); // Add the last value
+
+  return shortenedArr;
+}
+export { manipulateStringNdColors, modifyString, rmSpce, processArray };

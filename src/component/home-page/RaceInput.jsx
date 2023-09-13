@@ -252,7 +252,7 @@ const RaceInput = memo(function RaceInput({
       onPaste={() => e.preventDefault()}
       value={currUserText}
       onChange={handleInput}
-      className={`p-2 border-2 border-gray-900 w-96 mx-2 ${
+      className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px] max-w-[700px] w-[100%] mx-2 ${
         gameEnd ? "border-[1px] select-none pointer-events-none" : ""
       }`}
     />

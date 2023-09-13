@@ -10,7 +10,6 @@ const initialState = {
   accuracy: 0,
   gameType: "normal",
   mistakesArray: [],
-  place: "1/4",
   isGameCompleted: false,
 };
 
