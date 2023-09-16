@@ -1,11 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  wpmArray: [],
+  wpmObj: {},
   wpm: 0,
   givenString: "",
   writenString: [],
-  secondsArray: [],
   typeTime: "",
   accuracy: 0,
   gameType: "normal",

@@ -217,11 +217,13 @@ const RaceInput = memo(function RaceInput({
                 mistakeLetters: wrongText,
               });
               // Return the updated state
+              setIsMistakeDeleted(false);
               return updatedState;
             } else if (isWordSame && isLongerMistake) {
               // Update the mistake letters in the last mistake object
               lastMistake.mistakeLetters = wrongText;
               // Return the updated state
+              setIsMistakeDeleted(false);
               return updatedState;
             } else {
               // Return the original state as no changes are needed

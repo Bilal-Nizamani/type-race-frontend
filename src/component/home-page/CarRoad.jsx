@@ -20,7 +20,6 @@ const CarRoad = memo(function CarRoad() {
     const writtenTextPercent =
       (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
 
-    console.log(writtenTextPercent);
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }

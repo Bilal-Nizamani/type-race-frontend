@@ -12,7 +12,6 @@ const GameTimer = memo(function GameTimer({
 
   useEffect(() => {
     socket.on("timer_update", (timerUpdate) => {
-      console.log(timerUpdate);
       setRoomTimer(timerUpdate);
     });
 
