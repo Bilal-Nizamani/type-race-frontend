@@ -65,7 +65,11 @@ const CarRoad = memo(function CarRoad() {
         </div>
       </div>
       {otherPlayersData?.map((item) => {
-        return <CarComponent key={item.userName} userData={item} />;
+        return (
+          <div key={item.userName}>
+            <CarComponent userData={item} />
+          </div>
+        );
       })}
     </div>
   );

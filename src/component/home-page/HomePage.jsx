@@ -61,19 +61,23 @@ const RaceGame = () => {
   }, []);
 
   const createRoomHandler = () => {
-    if (
-      isWaiting ||
-      isCounting ||
-      isGameBeingPlayed ||
-      roomGameState === "started"
-    ) {
-      socket.emit("leave_room", " leave the room");
-    } else {
-      socket.emit("user_ready_to_play", "i am want");
+    try {
+      if (
+        isWaiting ||
+        isCounting ||
+        isGameBeingPlayed ||
+        roomGameState === "started"
+      ) {
+        socket.emit("leave_room", " leave the room");
+      } else {
+        socket.emit("user_ready_to_play", "i am want");
+      }
+      setIsRaceCompleted(false);
+      setRoomGameState("started");
+      changeDatatoDefault();
+    } catch (err) {
+      console.log(err);
     }
-    setIsRaceCompleted(false);
-    setRoomGameState("started");
-    changeDatatoDefault();
   };
 
   useEffect(() => {
