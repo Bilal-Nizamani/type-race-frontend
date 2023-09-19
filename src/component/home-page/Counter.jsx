@@ -127,11 +127,13 @@ const Counter = memo(function Counter() {
         isGameBeingPlayed={isGameBeingPlayed}
         isRaceCompleted={isRaceCompleted}
       />
-      <div className="bg-gray-300 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
-        <span className="text-lg font-semibold text-blue-500">
+      <div className=" p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
+        <span className="text-lg font-bold text-blue-500">
           WPM: {serverWpm}
         </span>
-        <div className="text-lg text-green-500">Accuracy: {accuracy}%</div>
+        <div className="text-lg font-bold text-green-500">
+          Accuracy: {accuracy}%
+        </div>
       </div>
     </>
   );

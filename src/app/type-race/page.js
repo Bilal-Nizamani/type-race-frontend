@@ -9,9 +9,7 @@ const typeRace = () => {
   return (
     <div>
       <Navbar />
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <RaceGameContainer />
-      </main>
+      <RaceGameContainer />
       <Footer />
     </div>
   );

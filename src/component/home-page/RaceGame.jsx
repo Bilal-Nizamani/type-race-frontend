@@ -209,7 +209,7 @@ const RaceGame = () => {
 
   return (
     <>
-      <div className="relative bg-gray-900 text-white p-8 flex flex-col  2xl:w-[1300px] md:w-[700px] lg:w-[1000px] justify-center">
+      <div className="max-w-screen-xl mx-auto bg-gray-900 text-white min-h-screen p-4 relative">
         <div
           className="  text-3xl text-center -mt-5 mb-3 font-semibold"
           id="title"

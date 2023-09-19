@@ -255,7 +255,7 @@ const RaceInput = memo(function RaceInput({
       ref={inputRef}
       type="text"
       disabled={gameEnd}
-      onPaste={() => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
       value={currUserText}
       onChange={handleInput}
       className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px] max-w-[700px] w-[100%] mx-2 ${
