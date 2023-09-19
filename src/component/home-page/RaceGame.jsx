@@ -18,6 +18,9 @@ const RaceGame = () => {
     (state) => state.socketSharedData,
     shallowEqual
   );
+  const isSocketConnected = useSelector(
+    (state) => state.socketConnection.autoRoomConnection
+  );
   const userShareData = useSelector((state) => state.socketSharedData);
   const previousSocketSharedDataRef = useRef(currentSocketSharedData);
   const [isWaiting, setIsWaiting] = useState(false);
@@ -61,22 +64,26 @@ const RaceGame = () => {
   }, []);
 
   const createRoomHandler = () => {
-    try {
-      if (
-        isWaiting ||
-        isCounting ||
-        isGameBeingPlayed ||
-        roomGameState === "started"
-      ) {
-        socketService.socket.emit("leave_room", " leave the room");
-      } else {
-        socketService.socket.emit("user_ready_to_play", "i am want");
+    if (isSocketConnected) {
+      try {
+        if (
+          isWaiting ||
+          isCounting ||
+          isGameBeingPlayed ||
+          roomGameState === "started"
+        ) {
+          socketService.socket.emit("leave_room", " leave the room");
+        } else {
+          socketService.socket.emit("user_ready_to_play", "i am want");
+        }
+        setIsRaceCompleted(false);
+        setRoomGameState("started");
+        changeDatatoDefault();
+      } catch (err) {
+        console.log(err);
       }
-      setIsRaceCompleted(false);
-      setRoomGameState("started");
-      changeDatatoDefault();
-    } catch (err) {
-      console.log(err);
+    } else {
+      alert("Connection Problem");
     }
   };
 
@@ -90,7 +97,7 @@ const RaceGame = () => {
         checkDataSend) ||
       isCounting
     ) {
-      socketService.socket &&
+      isSocketConnected &&
         socketService.socket.emit("player_data", currentSocketSharedData);
     }
 
@@ -98,21 +105,34 @@ const RaceGame = () => {
 
     // Update the previousSocketSharedDataRef to the current value
     previousSocketSharedDataRef.current = currentSocketSharedData;
-  }, [currentSocketSharedData, isGameBeingPlayed, isCounting, checkDataSend]);
+  }, [
+    currentSocketSharedData,
+    isSocketConnected,
+    isGameBeingPlayed,
+    isCounting,
+    checkDataSend,
+  ]);
 
   useEffect(() => {
     if (isCounting || isGameBeingPlayed) {
-      socketService.socket &&
+      isSocketConnected &&
         socketService.socket.on("room_players_data", (playersData) => {
           const upDatedPlayers = playersData;
           dispatch(addPlayingPlayersData(upDatedPlayers));
         });
     }
-  }, [isGameBeingPlayed, isCounting, dispatch, userShareData]);
+  }, [
+    isGameBeingPlayed,
+    isCounting,
+    dispatch,
+    userShareData,
+    isSocketConnected,
+  ]);
 
   useEffect(() => {
-    const socket = socketService.socket;
-    if (socket) {
+    if (isSocketConnected) {
+      const socket = socketService.socket;
+
       socket.on("match_found", (raceText) => {
         setIsGameBeingPlayed(false);
         gameEnder(raceText, false);
@@ -173,9 +193,8 @@ const RaceGame = () => {
         setGameEnd(false);
         setCount(0);
       });
-      // Clean up the socket connection on component unmount
     }
-  }, [gameEnder, socketService.socket]);
+  }, [gameEnder, isSocketConnected]);
 
   useEffect(() => {
     dispatch(
@@ -230,8 +249,9 @@ const RaceGame = () => {
             gameEnder={gameEnder}
             getCurrText={getCurrText}
             isGameBeingPlayed={isGameBeingPlayed}
+            isSocketConnected={isSocketConnected}
           />
-          <Counter />
+          <Counter isSocketConnected={isSocketConnected} />
         </div>
         <button
           className="mt-2 p-3 px-5 text-[1.5rem] mx-auto  bg-blue-500 text-white rounded-md hover:bg-blue-600"

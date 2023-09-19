@@ -1,7 +1,5 @@
-"use client";
 import Navbar from "@/component/Navbar";
 import Footer from "@/component/Footer";
-import { useEffect } from "react";
 
 export default function Home() {
   return (

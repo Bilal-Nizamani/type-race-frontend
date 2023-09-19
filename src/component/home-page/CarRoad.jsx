@@ -55,12 +55,7 @@ const CarRoad = memo(function CarRoad() {
           className=" w-16  transition-all duration-300 ease-in-out"
         >
           <div className="mt-[-3rem]">
-            <Image
-              width={100}
-              height={100}
-              src={`/${car}.png`}
-              alt="asdfasdf"
-            />
+            <Image width={100} height={100} src={`/${car}.png`} alt="error" />
           </div>
         </div>
       </div>

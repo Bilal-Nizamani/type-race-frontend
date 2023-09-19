@@ -1,12 +1,13 @@
+"use client";
 import React from "react";
-import RoomList from "@/component/manual-rooms/RoomList";
 import Footer from "@/component/Footer";
 import Navbar from "@/component/Navbar";
+import RoomListContainer from "@/component/manual-rooms/RoomListContainer";
 
 const rooms = () => {
   return (
     <>
-      <Navbar /> <RoomList /> <Footer />
+      <Navbar /> <RoomListContainer /> <Footer />
     </>
   );
 };

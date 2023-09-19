@@ -40,7 +40,6 @@ const socketService = {
 
   connect: function (message) {
     try {
-      console.log("adfasdf");
       this.socket = io("http://localhost:3001");
 
       if (!this.socket) {

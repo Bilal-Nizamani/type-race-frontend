@@ -64,14 +64,12 @@ const RoomList = () => {
 
   useEffect(() => {
     socketService.connect("room-list");
-    if (socketService.socket) {
-      return () => {
-        socketService.socket.disconnect();
-        socketService.socket = null;
+    return () => {
+      socketService?.socket?.disconnect();
+      socketService.socket = null;
 
-        console.log("disconeted roomlist");
-      };
-    }
+      console.log("disconeted roomlist");
+    };
   }, []);
 
   return (

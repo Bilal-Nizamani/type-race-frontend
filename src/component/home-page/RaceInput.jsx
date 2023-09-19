@@ -14,6 +14,7 @@ const RaceInput = memo(function RaceInput({
   getCurrText,
   gameEnd,
   gameEnder,
+  isSocketConnected,
 }) {
   const inputRef = useRef(null);
   const dispatch = useDispatch();
@@ -29,8 +30,7 @@ const RaceInput = memo(function RaceInput({
   const [currText, setCurrText] = useState("");
 
   useEffect(() => {
-    socketService.connect();
-    if (socketService.socket) {
+    if (isSocketConnected) {
       socketService.socket.on("match_found", (raceText) => {
         setOriginalStringArray(raceText.split(" "));
         setWrongWords([]);
@@ -41,7 +41,7 @@ const RaceInput = memo(function RaceInput({
         setCurrText(raceText);
       });
     }
-  }, []);
+  }, [isSocketConnected]);
 
   useEffect(() => {
     getCurrText(currText);
