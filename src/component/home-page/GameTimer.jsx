@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, memo } from "react";
-import socket from "@/config/socket";
+import socketService from "@/config/socket";
 
 const GameTimer = memo(function GameTimer({
   getTimer,
@@ -11,14 +11,16 @@ const GameTimer = memo(function GameTimer({
   const [roomTimer, setRoomTimer] = useState(200);
 
   useEffect(() => {
-    socket.on("timer_update", (timerUpdate) => {
-      setRoomTimer(timerUpdate);
-    });
+    socketService.socket &&
+      socketService.socket.on("timer_update", (timerUpdate) => {
+        setRoomTimer(timerUpdate);
+      });
 
-    socket.on("room_left", () => {
-      setRoomTimer(200);
-    });
-  }, [getTimer]);
+    socketService.socket &&
+      socketService.socket.on("room_left", () => {
+        setRoomTimer(200);
+      });
+  }, [getTimer, socketService.socket]);
 
   useEffect(() => {
     if (!isRaceCompleted) {

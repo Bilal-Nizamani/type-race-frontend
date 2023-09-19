@@ -6,7 +6,7 @@ import {
   modifyString,
   rmSpce,
 } from "@/utils/serviceFunction";
-import socket from "@/config/socket";
+import socketService from "@/config/socket";
 import { useDispatch } from "react-redux";
 import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
 const RaceInput = memo(function RaceInput({
@@ -29,15 +29,18 @@ const RaceInput = memo(function RaceInput({
   const [currText, setCurrText] = useState("");
 
   useEffect(() => {
-    socket.on("match_found", (raceText) => {
-      setOriginalStringArray(raceText.split(" "));
-      setWrongWords([]);
-      setWrongsLetters([]);
-      setOrginalString(raceText);
-      setRightText([]);
-      setArrayOfwrittenWords([]);
-      setCurrText(raceText);
-    });
+    socketService.connect();
+    if (socketService.socket) {
+      socketService.socket.on("match_found", (raceText) => {
+        setOriginalStringArray(raceText.split(" "));
+        setWrongWords([]);
+        setWrongsLetters([]);
+        setOrginalString(raceText);
+        setRightText([]);
+        setArrayOfwrittenWords([]);
+        setCurrText(raceText);
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -70,6 +73,7 @@ const RaceInput = memo(function RaceInput({
   // Handle user input change
   const handleInput = (e) => {
     const text = e.target.value;
+    console.log(originalStringArray);
     stringHandler(text);
   };
   // Handle user input and compare with the original string

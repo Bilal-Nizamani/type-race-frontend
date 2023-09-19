@@ -5,13 +5,13 @@ import Counter from "./Counter";
 import CarRoad from "./CarRoad";
 import RaceInput from "./RaceInput";
 import MyLineChart from "./MyLineChart";
-import socket from "@/config/socket";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { addPlayingPlayersData } from "@/redux-store/features/roomConnectedPlayersDataSlice";
 import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
 import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
 import _isEqual from "lodash/isEqual";
 import AllRoomPlayersScoreBoard from "./AllRoomPlayersScoreBoard";
+import socketService from "@/config/socket";
 
 const RaceGame = () => {
   const currentSocketSharedData = useSelector(
@@ -68,9 +68,9 @@ const RaceGame = () => {
         isGameBeingPlayed ||
         roomGameState === "started"
       ) {
-        socket.emit("leave_room", " leave the room");
+        socketService.socket.emit("leave_room", " leave the room");
       } else {
-        socket.emit("user_ready_to_play", "i am want");
+        socketService.socket.emit("user_ready_to_play", "i am want");
       }
       setIsRaceCompleted(false);
       setRoomGameState("started");
@@ -90,7 +90,8 @@ const RaceGame = () => {
         checkDataSend) ||
       isCounting
     ) {
-      socket.emit("player_data", currentSocketSharedData);
+      socketService.socket &&
+        socketService.socket.emit("player_data", currentSocketSharedData);
     }
 
     setCheckDataSend(isGameBeingPlayed);
@@ -101,79 +102,80 @@ const RaceGame = () => {
 
   useEffect(() => {
     if (isCounting || isGameBeingPlayed) {
-      socket.on("room_players_data", (playersData) => {
-        const upDatedPlayers = playersData;
-        dispatch(addPlayingPlayersData(upDatedPlayers));
-      });
+      socketService.socket &&
+        socketService.socket.on("room_players_data", (playersData) => {
+          const upDatedPlayers = playersData;
+          dispatch(addPlayingPlayersData(upDatedPlayers));
+        });
     }
   }, [isGameBeingPlayed, isCounting, dispatch, userShareData]);
 
   useEffect(() => {
-    socket.on("match_found", (raceText) => {
-      setIsGameBeingPlayed(false);
-      gameEnder(raceText, false);
-      setIsCounting(true);
-      setIsWaiting(false);
-    });
-    socket.on("room_left", () => {
-      setIsWaiting(false);
-      setGameEnd(true);
-      setIsCounting(false);
-      setIsGameBeingPlayed(false);
-      setCount(0);
-      setIsRaceCompleted(false);
-      setCurrText("");
-      changeDatatoDefault();
-      setRoomGameState("not-started");
-    });
+    const socket = socketService.socket;
+    if (socket) {
+      socket.on("match_found", (raceText) => {
+        setIsGameBeingPlayed(false);
+        gameEnder(raceText, false);
+        setIsCounting(true);
+        setIsWaiting(false);
+      });
+      socket.on("room_left", () => {
+        setIsWaiting(false);
+        setGameEnd(true);
+        setIsCounting(false);
+        setIsGameBeingPlayed(false);
+        setCount(0);
+        setIsRaceCompleted(false);
+        setCurrText("");
+        changeDatatoDefault();
+        setRoomGameState("not-started");
+      });
 
-    socket.on("room_created", (roomConfirmation) => {
-      setRoomCreatedMessage(roomConfirmation);
-    });
+      socket.on("room_created", (roomConfirmation) => {
+        setRoomCreatedMessage(roomConfirmation);
+      });
 
-    socket.on("time_up", () => {
-      setGameEnd(true);
-      gameEnder("Time UP", true);
-      setIsGameBeingPlayed(false);
-      setIsRaceCompleted(true);
-      setRoomGameState("ended");
-    });
+      socket.on("time_up", () => {
+        setGameEnd(true);
+        gameEnder("Time UP", true);
+        setIsGameBeingPlayed(false);
+        setIsRaceCompleted(true);
+        setRoomGameState("ended");
+      });
 
-    socket.on("waiting", () => {
-      setIsWaiting(true);
-    });
+      socket.on("waiting", () => {
+        setIsWaiting(true);
+      });
 
-    socket.on("game_completed", () => {
-      setGameEnd(true);
-      gameEnder("Race Ended", true);
-      setIsGameBeingPlayed(false);
-      setIsRaceCompleted(true);
-      setRoomGameState("ended");
-    });
-    socket.on("left_alone", () => {
-      setCount(0);
-      setCheckDataSend(true);
-      changeDatatoDefault();
-      setIsWaiting(true);
-    });
+      socket.on("game_completed", () => {
+        setGameEnd(true);
+        gameEnder("Race Ended", true);
+        setIsGameBeingPlayed(false);
+        setIsRaceCompleted(true);
+        setRoomGameState("ended");
+      });
+      socket.on("left_alone", () => {
+        setCount(0);
+        setCheckDataSend(true);
+        changeDatatoDefault();
+        setIsWaiting(true);
+      });
 
-    socket.on("countdown_timer", (countTimer) => {
-      setCount(countTimer);
-      setCheckDataSend(true);
-    });
+      socket.on("countdown_timer", (countTimer) => {
+        setCount(countTimer);
+        setCheckDataSend(true);
+      });
 
-    socket.on("counting_completed", () => {
-      setIsCounting(false);
-      setIsGameBeingPlayed(true);
-      socket.emit("game_started", {});
-      setGameEnd(false);
-      setCount(0);
-    });
-    // Clean up the socket connection on component unmount
-    return () => {
-      socket.disconnect();
-    };
-  }, [gameEnder]);
+      socket.on("counting_completed", () => {
+        setIsCounting(false);
+        setIsGameBeingPlayed(true);
+        socket.emit("game_started", {});
+        setGameEnd(false);
+        setCount(0);
+      });
+      // Clean up the socket connection on component unmount
+    }
+  }, [gameEnder, socketService.socket]);
 
   useEffect(() => {
     dispatch(

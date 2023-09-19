@@ -15,7 +15,7 @@ const initialState = {
 };
 
 export const gamePlaySlice = createSlice({
-  name: "auth",
+  name: "gameplay-data",
   initialState,
   reducers: {
     addGamePlayData: (state, action) => {

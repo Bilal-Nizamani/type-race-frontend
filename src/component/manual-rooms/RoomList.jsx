@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Room from "./Room";
 import CreateRoom from "./CreateRoom";
+import socketService from "@/config/socket";
 
 const RoomList = () => {
   const initialRooms = [
@@ -60,6 +61,18 @@ const RoomList = () => {
     );
     setRooms(filteredRooms);
   };
+
+  useEffect(() => {
+    socketService.connect("room-list");
+    if (socketService.socket) {
+      return () => {
+        socketService.socket.disconnect();
+        socketService.socket = null;
+
+        console.log("disconeted roomlist");
+      };
+    }
+  }, []);
 
   return (
     <div className="max-w-screen-xl mx-auto bg-gray-900 text-white min-h-screen p-4 relative">

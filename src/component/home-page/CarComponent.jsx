@@ -6,7 +6,7 @@ const CarComponent = ({ userData }) => {
     <div className={`h-3   w-full  pl-[100px]  bg-slate-300 `}>
       <div
         style={{ marginLeft: `calc(${carPosition * 100}% - 70px)` }}
-        className={` w-16 mb-14  transition-all duration-300 ease-in-out`}
+        className={` w-16 flex  transition-all duration-300 ease-in-out`}
       >
         <div className="mt-[-3rem] flex">
           <Image width={100} height={100} src={`/${car}.png`} alt="" />

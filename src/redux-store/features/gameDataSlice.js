@@ -13,7 +13,7 @@ const initialState = {
 };
 
 export const gameDataSlice = createSlice({
-  name: "auth",
+  name: "game-data",
   initialState,
   reducers: {
     addGameData: (state, action) => {
