@@ -18,18 +18,21 @@ const RaceGameContainer = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    socketService.connect();
-
+    if (!isConnected) {
+      socketService.connect("raceGAme");
+    }
     socketService.onConnect(() => {
       setIsConnected(true);
       dispatch(storeConnection({ autoRoomConnection: true }));
     });
 
-    return () => {
-      socketService.socket.disconnect();
-      socketService.socket = null;
-      dispatch(storeConnection({ autoRoomConnection: false }));
-    };
+    if (isConnected) {
+      return () => {
+        socketService.socket.disconnect();
+        socketService.socket = null;
+        dispatch(storeConnection({ autoRoomConnection: false }));
+      };
+    }
   }, [isConnected, dispatch]);
   return <RaceGame />;
 };

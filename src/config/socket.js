@@ -49,11 +49,12 @@ const socketService = {
       this.socket.on("connect", () => {
         console.log("connected", message);
         // Call any registered connect callbacks
+
         this.callConnectCallbacks(); // Call the function here
       });
 
       this.socket.on("connect_error", (err) => {
-        throw new Error("errs");
+        console.log(err);
       });
     } catch (err) {
       console.log(err);

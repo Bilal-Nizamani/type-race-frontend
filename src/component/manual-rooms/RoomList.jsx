@@ -4,7 +4,7 @@ import Room from "./Room";
 import CreateRoom from "./CreateRoom";
 import socketService from "@/config/socket";
 
-const RoomList = () => {
+const RoomList = ({ isSocketConnected }) => {
   const initialRooms = [
     { hostname: "John Doe", roomName: "Intermediate Typing Challenge" },
     { hostname: "Alice Smith", roomName: "Expert Typing Showdown" },
@@ -29,11 +29,15 @@ const RoomList = () => {
   ];
   const [isCreateRoomOpen, setCreateRoomOpen] = useState(false);
   const [rooms, setRooms] = useState(initialRooms);
+
   const [isInRoom, setIsInRoom] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleJoinRoom = () => {
-    setIsInRoom(true);
+    if (isSocketConnected) {
+      socketService.socket.emit("manual_join_room", { roomId: "room2" });
+      setIsInRoom(true);
+    }
   };
 
   const getCreateRoomPopupDisplay = () => {
@@ -45,6 +49,9 @@ const RoomList = () => {
   };
 
   const handleLeaveRoom = () => {
+    if (isSocketConnected) {
+      socketService.socket.emit("manual_leave_room");
+    }
     setIsInRoom(false);
   };
 
@@ -61,21 +68,24 @@ const RoomList = () => {
     );
     setRooms(filteredRooms);
   };
-
   useEffect(() => {
-    socketService.connect("room-list");
-    return () => {
-      socketService?.socket?.disconnect();
-      socketService.socket = null;
-
-      console.log("disconeted roomlist");
-    };
-  }, []);
+    if (isSocketConnected) {
+      const socket = socketService.socket;
+      socket.on("get_all_rooms", (Allrooms) => {
+        setRooms(Allrooms);
+      });
+    }
+  }, [isSocketConnected]);
 
   return (
     <div className="max-w-screen-xl mx-auto bg-gray-900 text-white min-h-screen p-4 relative">
       <h1 className="text-4xl font-semibold text-center mb-8">Room List</h1>
-      {isInRoom && <Room handleLeaveRoom={handleLeaveRoom} />}
+      {isInRoom && (
+        <Room
+          isSocketConnected={isSocketConnected}
+          handleLeaveRoom={handleLeaveRoom}
+        />
+      )}
       <div className="w-full max-w-lg mx-auto relative">
         <div className="relative">
           <input
@@ -90,7 +100,10 @@ const RoomList = () => {
         </div>
       </div>
       {isCreateRoomOpen && (
-        <CreateRoom getCreateRoomPopupDisplay={getCreateRoomPopupDisplay} />
+        <CreateRoom
+          isSocketConnected={isSocketConnected}
+          getCreateRoomPopupDisplay={getCreateRoomPopupDisplay}
+        />
       )}
       {!isInRoom && (
         <button

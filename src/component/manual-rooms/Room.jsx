@@ -1,7 +1,9 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import RoomMessageInput from "./RoomMessageInput";
+import socketService from "@/config/socket";
 
-const Room = ({ handleLeaveRoom }) => {
+const Room = ({ handleLeaveRoom, isSocketConnected }) => {
   const players = [
     "bilal",
     "ehtsham",
@@ -12,7 +14,7 @@ const Room = ({ handleLeaveRoom }) => {
     "samad",
     "mateen",
   ];
-  const messages = [
+  const dummyMessages = [
     {
       name: "Bilal",
       message:
@@ -69,7 +71,19 @@ const Room = ({ handleLeaveRoom }) => {
         "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
     },
   ];
-  const handleSendMessage = () => {};
+  const [messages, setMessages] = useState(dummyMessages);
+  useEffect(() => {
+    if (isSocketConnected) {
+      socketService.socket.on("all_messages", (allMessages) => {
+        setMessages(allMessages);
+      });
+    }
+  }, [isSocketConnected]);
+
+  const handleStartRace = () => {
+    if (isSocketConnected) socketService.socket.emit("manual_start_race", {});
+    console.log("startRAce");
+  };
 
   return (
     <div className="my-4 w-full p-3">
@@ -88,7 +102,10 @@ const Room = ({ handleLeaveRoom }) => {
             ))}
           </div>
           <div className="justify-around items-center gap-y-4 flex flex-wrap ">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-300">
+            <button
+              onClick={handleStartRace}
+              className="bg-blue-500 hover:bg-blue-600 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-300"
+            >
               Start Race
             </button>
             <button
@@ -120,18 +137,7 @@ const Room = ({ handleLeaveRoom }) => {
           </div>
 
           <div className="h-[10%] relative">
-            <input
-              placeholder="Message"
-              //   value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              className="w-full h-full bg-gray-700 py-3 px-4 text-white text-lg placeholder-gray-400 focus:outline-none"
-            />
-            <button
-              className="absolute top-0 right-0 h-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4  focus:outline-none active:scale-[0.95] "
-              onClick={handleSendMessage}
-            >
-              Send
-            </button>
+            <RoomMessageInput isSocketConnected={isSocketConnected} />
           </div>
         </div>
       </div>

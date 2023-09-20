@@ -1,10 +1,17 @@
 import React from "react";
+import socketService from "@/config/socket";
 
-const CreateRoom = ({ getCreateRoomPopupDisplay }) => {
+const CreateRoom = ({ getCreateRoomPopupDisplay, isSocketConnected }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isSocketConnected)
+      socketService.socket.emit("manual_create_room", {
+        roomName: "Only UpTo 50wmp",
+        hoseName: "bilal",
+      });
     getCreateRoomPopupDisplay();
   };
+
   return (
     <div className="fixed inset-0 flex items-center shadow-lg justify-center z-50 bg-black bg-opacity-50">
       <div className="bg-gray-800 rounded-lg p-6 w-96">

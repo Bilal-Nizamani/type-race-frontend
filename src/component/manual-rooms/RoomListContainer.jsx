@@ -7,22 +7,22 @@ import socketService from "@/config/socket";
 
 const RoomListContainer = () => {
   const dispatch = useDispatch();
-  const [isConnected, setIsConnected] = useState(false);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
   useEffect(() => {
-    socketService.connect();
+    if (!isSocketConnected) socketService.connect("roomlist");
     socketService.onConnect(() => {
-      setIsConnected(true);
+      setIsSocketConnected(true);
       dispatch(storeConnection({ roomListConnection: true }));
     });
-    if (isConnected) {
+    if (isSocketConnected) {
       return () => {
         socketService.socket.disconnect();
         socketService.socket = null;
         dispatch(storeConnection({ roomListConnection: false }));
       };
     }
-  }, [isConnected, dispatch]);
-  return <RoomList />;
+  }, [isSocketConnected, dispatch]);
+  return <RoomList isSocketConnected={isSocketConnected} />;
 };
 
 export default RoomListContainer;
