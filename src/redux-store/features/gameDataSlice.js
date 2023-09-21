@@ -5,6 +5,7 @@ const initialState = {
   wpm: 0,
   givenString: "",
   writenString: [],
+  totalMistakes: 0,
   typeTime: "",
   accuracy: 0,
   gameType: "normal",

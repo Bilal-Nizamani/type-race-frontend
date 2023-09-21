@@ -50,7 +50,7 @@ const CarRoad = memo(function CarRoad() {
       <div className="h-3  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
         <div
           style={{
-            marginLeft: `calc(${myData.carPosition * 100}% - 70px)`,
+            marginLeft: `calc(${myData.carPosition * 100}% - 85px)`,
           }}
           className=" w-16  transition-all duration-300 ease-in-out"
         >

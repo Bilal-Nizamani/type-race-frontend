@@ -37,11 +37,11 @@ const GameTimer = memo(function GameTimer({
     <div className="flex justify-between">
       <div
         style={{
-          color: roomTimer < 10 && isGameBeingPlayed ? "red" : "gray",
+          color: roomTimer < 10 && isGameBeingPlayed ? "red" : "white",
         }}
-        className="text-2xl  mb-6"
+        className="text-lg font-bold  "
       >
-        {roomTimer}
+        Seconds: {roomTimer}
       </div>
     </div>
   );

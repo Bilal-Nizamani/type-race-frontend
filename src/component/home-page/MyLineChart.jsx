@@ -54,7 +54,7 @@ const MyLineChart = memo(function MyLineChart({ isRaceCompleted }) {
 
   return (
     <>
-      <ScoreBoard playedGameData={playedGameData} />
+      <ScoreBoard playedGameData={gameData} />
       <div className=" w-full shadow-sm shadow-white p-2 rounded-md flex justify-center  mt-5 ">
         <Line
           data={{

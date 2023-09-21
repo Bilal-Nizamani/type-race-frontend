@@ -73,7 +73,6 @@ const RaceInput = memo(function RaceInput({
   // Handle user input change
   const handleInput = (e) => {
     const text = e.target.value;
-    console.log(originalStringArray);
     stringHandler(text);
   };
   // Handle user input and compare with the original string
@@ -258,7 +257,7 @@ const RaceInput = memo(function RaceInput({
       onPaste={(e) => e.preventDefault()}
       value={currUserText}
       onChange={handleInput}
-      className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px] max-w-[700px] w-[100%] mx-2 ${
+      className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px]  w-full  mx-2 ${
         gameEnd ? "border-[1px] select-none pointer-events-none" : ""
       }`}
     />
