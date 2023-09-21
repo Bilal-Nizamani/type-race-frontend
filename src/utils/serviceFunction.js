@@ -48,24 +48,42 @@ function rmSpce(inputString) {
 
 /// that select lower  average of 30 value to the length of array
 // works only for numbers
-function processArray(arr) {
-  if (arr.length < 31) return arr;
-  const firstValue = arr[0];
-  const lastValue = arr[arr.length - 1];
-
-  // Calculate the step size to select average numbers between the first and last values
-  const stepSize = (lastValue - firstValue) / 29;
-
-  const shortenedArr = [firstValue]; // Start with the first value
-
-  // Iterate through the array and select average numbers
-  for (let i = 1; i < 29; i++) {
-    const average = firstValue + stepSize * i;
-    shortenedArr.push(arr[Math.floor(average)]);
+function processArray(wpmAndSecondsArrObj) {
+  let obj = { wpmArray: [], secondsArray: [] };
+  let checkIfStartedTyping = false;
+  let index = 0;
+  for (const key in wpmAndSecondsArrObj) {
+    index++;
+    if (!checkIfStartedTyping && wpmAndSecondsArrObj[key] > 0)
+      checkIfStartedTyping = true;
+    else if (wpmAndSecondsArrObj.length - index === 30)
+      checkIfStartedTyping = true;
+    if (checkIfStartedTyping) {
+      obj.wpmArray.push(wpmAndSecondsArrObj[key]);
+      obj.secondsArray.push(key);
+    }
   }
 
-  shortenedArr.push(lastValue); // Add the last value
+  if (obj.wpmArray.length <= 30) return obj; // If the array is already 30 or fewer elements, return as is
 
-  return shortenedArr;
+  // Check if the length of wpmArray is greater than 30 before shortening
+  if (obj.wpmArray.length > 30) {
+    const stepSize = Math.floor((obj.wpmArray.length - 2) / 28);
+    const shortenedWpmArray = [obj.wpmArray[0]];
+    const shortenedSecondsArray = [obj.secondsArray[0]];
+
+    for (let i = 1; i < 29; i++) {
+      const index = i * stepSize + 1;
+      shortenedWpmArray.push(obj.wpmArray[index]);
+      shortenedSecondsArray.push(obj.secondsArray[index]);
+    }
+
+    // Modify the original object to replace wpmArray and secondsArray
+    obj.wpmArray = shortenedWpmArray;
+    obj.secondsArray = shortenedSecondsArray;
+  }
+
+  return obj;
 }
+
 export { manipulateStringNdColors, modifyString, rmSpce, processArray };

@@ -25,7 +25,7 @@ const AllRoomPlayersScoreBoard = () => {
           <div className="sm:w-1/4 sm:mr-4">
             {/* User's Car Image */}
             <div
-              style={{ boxShadow: "0px 0px 10px 5px rgba(0,0,0,0.7)" }}
+              style={{ boxShadow: "0px 0px 10px 5px #3B82F6" }}
               className="flex bg-gray-900 rounded-lg flex-col justify-center m-auto text-center items-center "
             >
               <h3 className="text-lg w-full p-2 mb-2 sm:mb-0">

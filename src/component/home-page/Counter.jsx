@@ -14,7 +14,10 @@ import GameTimer from "./GameTimer";
 
 const Counter = memo(function Counter() {
   const dispatch = useDispatch();
+  let wpmObj = useRef({});
+
   const [serverWpm, setServerWpm] = useState(0);
+  const refServerWpm = useRef(serverWpm);
 
   const gameData = useSelector((state) => state.gamePlayData);
   const roomPlsData = useSelector((state) => state.roomConnectedPlayersData);
@@ -41,19 +44,18 @@ const Counter = memo(function Counter() {
 
   const [speedTestTimer, setSpeedTestTimer] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
-  const secondsArray = useRef(new Set());
-  const wpmArray = useRef([]);
 
   const getTimer = useCallback((seconds) => {
     setSpeedTestTimer(seconds);
   }, []);
-
+  useEffect(() => {
+    refServerWpm.current = serverWpm;
+  }, [serverWpm]);
   useEffect(() => {
     if (!gameEnd) {
-      secondsArray.current.add(speedTestTimer + 1);
-      wpmArray.current.push(serverWpm);
+      wpmObj.current[speedTestTimer] = refServerWpm.current;
     }
-  }, [gameEnd, speedTestTimer, serverWpm]);
+  }, [speedTestTimer, gameEnd]);
 
   useEffect(() => {
     dispatch(
@@ -74,8 +76,7 @@ const Counter = memo(function Counter() {
         })
       );
       setAccuracy(0);
-      secondsArray.current = new Set();
-      wpmArray.current = [];
+      wpmObj.current = {};
     }
   }, [isCounting, dispatch]); // Added all Gthe relevant set functions as dependencies
 
@@ -106,32 +107,34 @@ const Counter = memo(function Counter() {
 
       dispatch(
         addGameData({
-          wpmArray: wpmArray.current,
+          wpmObj: wpmObj.current,
           wpm: serverWpm,
           givenString: orginalString,
           writenString: rightText,
-          secondsArray: Array.from(secondsArray.current),
           typeTime: speedTestTimer,
           accuracy: accuracyPercent,
           gameType: "normal",
+          totalMistakes: totalMistakes,
           mistakesArray: wrongsLetters,
         })
       );
     }
-  }, [isRaceCompleted, arrayOfwrittenWords, speedTestTimer, orginalString, wrongsLetters, secondsArray, serverWpm, rightText, dispatch]);
+  }, [isRaceCompleted, arrayOfwrittenWords, speedTestTimer, wpmObj, orginalString, wrongsLetters, serverWpm, rightText, dispatch]);
 
   return (
     <>
-      <GameTimer
-        getTimer={getTimer}
-        isGameBeingPlayed={isGameBeingPlayed}
-        isRaceCompleted={isRaceCompleted}
-      />
-      <div className="bg-gray-300 p-4 rounded-lg shadow-md flex justify-between items-center min-w-[500px] mb-6">
-        <span className="text-lg font-semibold text-blue-500">
+      <div className=" p-4 rounded-full shadow-md flex justify-center  items-center gap-x-5  mb-6">
+        <span className="text-lg font-bold text-blue-500">
           WPM: {serverWpm}
         </span>
-        <div className="text-lg text-green-500">Accuracy: {accuracy}%</div>
+        <GameTimer
+          getTimer={getTimer}
+          isGameBeingPlayed={isGameBeingPlayed}
+          isRaceCompleted={isRaceCompleted}
+        />
+        <div className="text-lg font-bold text-green-500">
+          Accuracy: {accuracy}%
+        </div>
       </div>
     </>
   );
