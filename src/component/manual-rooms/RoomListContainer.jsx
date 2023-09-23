@@ -11,6 +11,12 @@ const RoomListContainer = () => {
   useEffect(() => {
     if (!isSocketConnected) socketService.connect("roomlist");
     socketService.onConnect(() => {
+      socketService.socket.emit("player_info", {
+        userName: "bila" + Math.random(),
+        name: "Bilal Nizamani",
+        lever: 1,
+        averageWpm: Math.random() * 100 + 20,
+      });
       setIsSocketConnected(true);
       dispatch(storeConnection({ roomListConnection: true }));
     });

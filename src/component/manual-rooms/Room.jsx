@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import RoomMessageInput from "./RoomMessageInput";
 import socketService from "@/config/socket";
 
-const Room = ({ handleLeaveRoom, isSocketConnected }) => {
+const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
   const players = [
     "bilal",
     "ehtsham",
@@ -17,58 +17,24 @@ const Room = ({ handleLeaveRoom, isSocketConnected }) => {
   const dummyMessages = [
     {
       name: "Bilal",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
+      message: "Working Typing race game",
     },
     {
       name: "Ehtsam",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
+      message: "ssasdfasdf",
     },
     {
       name: "Mateen",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
+      message: "ajsd fhasjkd fhkl",
     },
+
     {
-      name: "Khabeer",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
-    },
-    {
-      name: "Shahzeb",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
-    },
-    {
-      name: "Amman",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
+      name: "Qavi",
+      message: "Hi hello",
     },
     {
       name: "Qavi",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
-    },
-    {
-      name: "Khabeer",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
-    },
-    {
-      name: "Shahzeb",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
-    },
-    {
-      name: "Amman",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
-    },
-    {
-      name: "Qavi",
-      message:
-        "In this Next 13 tutorial series, you'll learn the basics of Next.js to make a simple project, using the new app router & server components.",
+      message: "just a message",
     },
   ];
   const [messages, setMessages] = useState(dummyMessages);
@@ -137,7 +103,10 @@ const Room = ({ handleLeaveRoom, isSocketConnected }) => {
           </div>
 
           <div className="h-[10%] relative">
-            <RoomMessageInput isSocketConnected={isSocketConnected} />
+            <RoomMessageInput
+              isSocketConnected={isSocketConnected}
+              myRoomData={myRoomData.id}
+            />
           </div>
         </div>
       </div>

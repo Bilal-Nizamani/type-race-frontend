@@ -7,7 +7,6 @@ const CreateRoom = ({ getCreateRoomPopupDisplay, isSocketConnected }) => {
     if (isSocketConnected)
       socketService.socket.emit("manual_create_room", {
         roomName: "Only UpTo 50wmp",
-        hoseName: "bilal",
       });
     getCreateRoomPopupDisplay();
   };

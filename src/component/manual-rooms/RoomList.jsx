@@ -3,39 +3,21 @@ import React, { useState, useEffect } from "react";
 import Room from "./Room";
 import CreateRoom from "./CreateRoom";
 import socketService from "@/config/socket";
+import ButtonList from "./ButtonList";
 
 const RoomList = ({ isSocketConnected }) => {
-  const initialRooms = [
-    { hostname: "John Doe", roomName: "Intermediate Typing Challenge" },
-    { hostname: "Alice Smith", roomName: "Expert Typing Showdown" },
-    { hostname: "Emily Johnson", roomName: "Pro Typing Championship" },
-    { hostname: "Michael Wilson", roomName: "Advanced Typist Gathering" },
-    { hostname: "Sophia Brown", roomName: "Typing Masters Meetup" },
-    { hostname: "William Lee", roomName: "Typing Enthusiasts Club" },
-    { hostname: "Olivia Davis", roomName: "Speed Typing Contest" },
-    { hostname: "James Miller", roomName: "Keyboard Warriors Lounge" },
-    { hostname: "Emma Wilson", roomName: "Fast Fingers Fiesta" },
-    { hostname: "Liam Davis", roomName: "Type and Learn Social" },
-    { hostname: "Charlotte Harris", roomName: "Typing Champions Arena" },
-    { hostname: "Lucas White", roomName: "WPM Challenge Extravaganza" },
-    { hostname: "Ava Taylor", roomName: "Keyboard Kings and Queens" },
-    { hostname: "Mason Martin", roomName: "Type Like a Pro Room" },
-    { hostname: "Amelia Anderson", roomName: "Typing Titans Hall" },
-    { hostname: "Henry Jackson", roomName: "Word Wizards Club" },
-    { hostname: "Ella Turner", roomName: "Quick Fingers Society" },
-    { hostname: "Benjamin Clark", roomName: "Swift Typist Hangout" },
-    { hostname: "Grace Lewis", roomName: "Master Keyers Guild" },
-    { hostname: "Alexander Walker", roomName: "Typing Stars Lounge" },
-  ];
   const [isCreateRoomOpen, setCreateRoomOpen] = useState(false);
-  const [rooms, setRooms] = useState(initialRooms);
-
+  const [activeRooms, setActiveRooms] = useState([]);
+  const [roomsInCounting, setRoomsInCounting] = useState([]);
+  const [waitingRooms, setWaitingRooms] = useState([]);
   const [isInRoom, setIsInRoom] = useState(false);
+  const [myRoomData, setMyRoomData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleJoinRoom = () => {
+  const handleJoinRoom = (room) => {
     if (isSocketConnected) {
-      socketService.socket.emit("manual_join_room", { roomId: "room2" });
+      socketService.socket.emit("manual_join_room", { roomId: room.id });
+      setMyRoomData(room);
       setIsInRoom(true);
     }
   };
@@ -52,27 +34,46 @@ const RoomList = ({ isSocketConnected }) => {
     if (isSocketConnected) {
       socketService.socket.emit("manual_leave_room");
     }
+    setMyRoomData(null);
     setIsInRoom(false);
   };
 
   // Function to handle search input changes
   const handleSearchInputChange = (event) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    // Filter the rooms based on the search query
-    const filteredRooms = initialRooms.filter(
-      (room) =>
-        room.roomName.toLowerCase().includes(query) ||
-        room.hostname.toLowerCase().includes(query)
-    );
-    setRooms(filteredRooms);
+    // const query = event.target.value.toLowerCase();
+    // setSearchQuery(query);
+    // // Filter the rooms based on the search query
+    // const filteredRooms = activeRooms.filter(
+    //   (room) =>
+    //     room.roomName.toLowerCase().includes(query) ||
+    //     room.hostname.toLowerCase().includes(query)
+    // );
+    // setRooms(filteredRooms);
   };
   useEffect(() => {
-    if (isSocketConnected) {
+    if (isSocketConnected && socketService.socket) {
       const socket = socketService.socket;
-      socket.on("get_all_rooms", (Allrooms) => {
-        setRooms(Allrooms);
+
+      socket.on("get_rooms", (Allrooms) => {
+        setActiveRooms(Array.from(Allrooms.activeRooms));
+        setRoomsInCounting(Array.from(Allrooms.roomsInCounting));
+        setWaitingRooms(Array.from(Allrooms.waitingRooms));
+      });
+
+      socket.on("deleted_room", (roomToDelete) => {
+        setRooms((oldRooms) => {});
+      });
+
+      socket.on("new_room_added", (newRoom) => {
+        setWaitingRooms((oldRooms) => [...oldRooms, newRoom]);
+      });
+
+      socket.emit("get_all_rooms", {});
+
+      socket.on("room_created", (newRoom) => {
+        setMyRoomData(newRoom);
+        setWaitingRooms((oldRooms) => [...oldRooms, newRoom]);
+        setIsInRoom(true);
       });
     }
   }, [isSocketConnected]);
@@ -83,6 +84,7 @@ const RoomList = ({ isSocketConnected }) => {
       {isInRoom && (
         <Room
           isSocketConnected={isSocketConnected}
+          myRoomData={myRoomData}
           handleLeaveRoom={handleLeaveRoom}
         />
       )}
@@ -99,6 +101,8 @@ const RoomList = ({ isSocketConnected }) => {
           </span>
         </div>
       </div>
+      <ButtonList />
+
       {isCreateRoomOpen && (
         <CreateRoom
           isSocketConnected={isSocketConnected}
@@ -114,24 +118,36 @@ const RoomList = ({ isSocketConnected }) => {
         </button>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-        {rooms.map((room, index) => (
-          <div
-            key={index}
-            className="bg-gray-800 rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition duration-300 transform hover:scale-105"
-          >
-            <div>
-              <h2 className="text-xl font-semibold">{room.roomName}</h2>
-              <p className="text-gray-400">Host: {room.hostname}</p>
-            </div>
-            <button
-              onClick={handleJoinRoom}
-              disabled={isInRoom}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+        {waitingRooms?.map((room, index) => {
+          return (
+            <div
+              key={index}
+              className="bg-gray-800 rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition duration-300 transform hover:scale-105"
             >
-              JOIN ROOM
-            </button>
-          </div>
-        ))}
+              <div>
+                <h2 className="text-xl font-semibold">{room.roomName}</h2>
+                <p className="text-gray-400">Host: {room.host.name}</p>
+              </div>
+              {!isInRoom ? (
+                <button
+                  onClick={() => {
+                    handleJoinRoom(room);
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                >
+                  JOIN ROOM
+                </button>
+              ) : (
+                <button
+                  className="font-semibold py-2 px-4 mt-4 rounded-lg bg-gray-300 text-gray-600  cursor-not-allowed"
+                  disabled
+                >
+                  Already In Room
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
