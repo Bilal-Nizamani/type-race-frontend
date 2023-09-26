@@ -2,18 +2,19 @@
 import React, { useState, useEffect } from "react";
 import RoomMessageInput from "./RoomMessageInput";
 import socketService from "@/config/socket";
+import UserInRoom from "./UserInRoom";
 
 const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
-  const players = [
-    "bilal",
-    "ehtsham",
-    "hira",
-    "abdullah",
-    "hamza",
-    "qavi",
-    "samad",
-    "mateen",
-  ];
+  // const players = [
+  //   "bilal",
+  //   "ehtsham",
+  //   "hira",
+  //   "abdullah",
+  //   "hamza",
+  //   "qavi",
+  //   "samad",
+  //   "mateen",
+  // ];
   const dummyMessages = [
     {
       name: "Bilal",
@@ -38,6 +39,7 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
     },
   ];
   const [messages, setMessages] = useState(dummyMessages);
+  const [playersKeys, setPlayersKeys] = useState([]);
   useEffect(() => {
     if (isSocketConnected) {
       socketService.socket.on("all_messages", (allMessages) => {
@@ -50,20 +52,23 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
     if (isSocketConnected) socketService.socket.emit("manual_start_race", {});
     console.log("startRAce");
   };
+  useEffect(() => {
+    const arrayOfPlayersKeys = [];
+    for (let key in myRoomData.members) {
+      arrayOfPlayersKeys.push(key);
+    }
+    setPlayersKeys(arrayOfPlayersKeys);
+  }, [myRoomData]);
 
   return (
     <div className="my-4 w-full p-3">
       <div className="m-auto flex flex-col lg:flex-row w-[90%] border-[1px] min-h-[600px] bg-gray-900 text-white ">
         <div className="w-full lg:w-[30%] border-r-[1px] border-white  p-4 gap-5">
           <div className="h-[80%] overflow-y-auto">
-            {players.map((player, index) => (
-              <div key={index} className="flex items-center space-x-2 py-2">
-                <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold">
-                    {player.charAt(0)}
-                  </span>
-                </div>
-                <span className="text-white text-lg">{player}</span>
+            <UserInRoom player={myRoomData.host} isHost={true} />
+            {playersKeys?.map((playerKey) => (
+              <div key={playerKey}>
+                <UserInRoom player={myRoomData.members[key]} isHost={false} />
               </div>
             ))}
           </div>

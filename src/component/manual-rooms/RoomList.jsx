@@ -4,12 +4,10 @@ import Room from "./Room";
 import CreateRoom from "./CreateRoom";
 import socketService from "@/config/socket";
 import ButtonList from "./ButtonList";
-
+import { deleteRoom } from "@/utils/manualRoomsHelperFucntions";
 const RoomList = ({ isSocketConnected }) => {
   const [isCreateRoomOpen, setCreateRoomOpen] = useState(false);
-  const [activeRooms, setActiveRooms] = useState([]);
-  const [roomsInCounting, setRoomsInCounting] = useState([]);
-  const [waitingRooms, setWaitingRooms] = useState([]);
+  const [allRooms, setAllRooms] = useState({});
   const [isInRoom, setIsInRoom] = useState(false);
   const [myRoomData, setMyRoomData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +40,7 @@ const RoomList = ({ isSocketConnected }) => {
   const handleSearchInputChange = (event) => {
     // const query = event.target.value.toLowerCase();
     // setSearchQuery(query);
-    // // Filter the rooms based on the search query
+    //  Filter the rooms based on the search query
     // const filteredRooms = activeRooms.filter(
     //   (room) =>
     //     room.roomName.toLowerCase().includes(query) ||
@@ -54,25 +52,53 @@ const RoomList = ({ isSocketConnected }) => {
     if (isSocketConnected && socketService.socket) {
       const socket = socketService.socket;
 
-      socket.on("get_rooms", (Allrooms) => {
-        setActiveRooms(Array.from(Allrooms.activeRooms));
-        setRoomsInCounting(Array.from(Allrooms.roomsInCounting));
-        setWaitingRooms(Array.from(Allrooms.waitingRooms));
+      socket.on(
+        "get_rooms",
+        ({ waitingRooms, activeRooms, roomsInCounting }) => {
+          let allRoomsKeys = [
+            ...Object.keys(waitingRooms),
+            ...Object.keys(activeRooms),
+            ...Object.keys(roomsInCounting),
+          ];
+
+          setAllRooms({
+            keys: allRoomsKeys,
+            rooms: {
+              ...activeRooms,
+              ...waitingRooms,
+              ...roomsInCounting,
+            },
+          });
+        }
+      );
+
+      socket.on("room_deleted", (roomToDelete) => {
+        setAllRooms((oldRooms) => {
+          return deleteRoom(oldRooms, roomToDelete);
+        });
       });
 
-      socket.on("deleted_room", (roomToDelete) => {
-        setRooms((oldRooms) => {});
+      socket.on("room_data_updated", (updatedRoom) => {
+        setAllRooms((oldRooms) => {
+          let updatedRooms = { ...oldRooms };
+          updatedRooms.rooms[updatedRoom.id] = updatedRoom;
+          return updatedRooms;
+        });
       });
 
       socket.on("new_room_added", (newRoom) => {
-        setWaitingRooms((oldRooms) => [...oldRooms, newRoom]);
+        setAllRooms((oldRooms) => {
+          let updatedRooms = { ...oldRooms.rooms };
+          let updatedKeys = [...oldRooms.keys];
+          updatedKeys.push(newRoom.id);
+          updatedRooms[newRoom.id] = newRoom;
+          return { keys: updatedKeys, rooms: updatedRooms };
+        });
       });
-
       socket.emit("get_all_rooms", {});
 
       socket.on("room_created", (newRoom) => {
         setMyRoomData(newRoom);
-        setWaitingRooms((oldRooms) => [...oldRooms, newRoom]);
         setIsInRoom(true);
       });
     }
@@ -118,20 +144,24 @@ const RoomList = ({ isSocketConnected }) => {
         </button>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-        {waitingRooms?.map((room, index) => {
+        {allRooms.keys?.map((roomId) => {
           return (
             <div
-              key={index}
+              key={roomId}
               className="bg-gray-800 rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition duration-300 transform hover:scale-105"
             >
               <div>
-                <h2 className="text-xl font-semibold">{room.roomName}</h2>
-                <p className="text-gray-400">Host: {room.host.name}</p>
+                <h2 className="text-xl font-semibold">
+                  {allRooms.rooms[roomId]?.roomName}
+                </h2>
+                <p className="text-gray-400">
+                  Host: {allRooms.rooms[roomId]?.host?.name}
+                </p>
               </div>
               {!isInRoom ? (
                 <button
                   onClick={() => {
-                    handleJoinRoom(room);
+                    handleJoinRoom(allRooms.rooms[roomId]);
                   }}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                 >
@@ -139,7 +169,7 @@ const RoomList = ({ isSocketConnected }) => {
                 </button>
               ) : (
                 <button
-                  className="font-semibold py-2 px-4 mt-4 rounded-lg bg-gray-300 text-gray-600  cursor-not-allowed"
+                  className="font-semibold py-2f px-4 mt-4 rounded-lg bg-gray-300 text-gray-600  cursor-not-allowed"
                   disabled
                 >
                   Already In Room
