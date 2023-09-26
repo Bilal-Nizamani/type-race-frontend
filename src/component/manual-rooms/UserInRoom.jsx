@@ -2,7 +2,7 @@ import React from "react";
 
 const UserInRoom = ({ player, isHost }) => {
   return (
-    <div className="flex bg-[rgba(66,84,171,0.5)]  rounded-lg   items-center justify-center space-x-2  py-2">
+    <div className="flex mb-5 bg-[rgba(66,84,171,0.5)]  rounded-lg   items-center justify-center space-x-2  py-2">
       <div
         style={
           isHost ? { backgroundColor: "gray" } : { backgroundColor: "blue" }
@@ -14,7 +14,7 @@ const UserInRoom = ({ player, isHost }) => {
         </span>
       </div>
       <span className="text-white  text-lg">
-        {player?.name} {isHost ? "👑" : ""}
+        {player?.userName} {isHost ? "👑" : ""}
       </span>
     </div>
   );

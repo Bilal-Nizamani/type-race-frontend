@@ -5,16 +5,6 @@ import socketService from "@/config/socket";
 import UserInRoom from "./UserInRoom";
 
 const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
-  // const players = [
-  //   "bilal",
-  //   "ehtsham",
-  //   "hira",
-  //   "abdullah",
-  //   "hamza",
-  //   "qavi",
-  //   "samad",
-  //   "mateen",
-  // ];
   const dummyMessages = [
     {
       name: "Bilal",
@@ -24,26 +14,33 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
       name: "Ehtsam",
       message: "ssasdfasdf",
     },
-    {
-      name: "Mateen",
-      message: "ajsd fhasjkd fhkl",
-    },
-
-    {
-      name: "Qavi",
-      message: "Hi hello",
-    },
-    {
-      name: "Qavi",
-      message: "just a message",
-    },
   ];
   const [messages, setMessages] = useState(dummyMessages);
   const [playersKeys, setPlayersKeys] = useState([]);
+  const [roomData, setRoomData] = useState({});
   useEffect(() => {
     if (isSocketConnected) {
       socketService.socket.on("all_messages", (allMessages) => {
         setMessages(allMessages);
+      });
+      socketService.socket.on("someone_joined_room", (userName) => {
+        setMessages((oldMessages) => {
+          const upDatedMessages = [...oldMessages].push({
+            name: "none",
+            messag: `${userName} joined the room`,
+          });
+          return;
+        });
+      });
+      socketService.socket.on("room_data_changed", (room) => {
+        console.log(room);
+        const arrayOfPlayersKeys = [];
+        for (let key in room.members) {
+          arrayOfPlayersKeys.push(key);
+        }
+        setPlayersKeys(arrayOfPlayersKeys);
+
+        setRoomData(room);
       });
     }
   }, [isSocketConnected]);
@@ -58,17 +55,25 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
       arrayOfPlayersKeys.push(key);
     }
     setPlayersKeys(arrayOfPlayersKeys);
+
+    setRoomData(myRoomData);
   }, [myRoomData]);
 
   return (
     <div className="my-4 w-full p-3">
+      <div className=" text-center text-blue-400   italic text-xl">
+        {roomData.roomName}
+      </div>
       <div className="m-auto flex flex-col lg:flex-row w-[90%] border-[1px] min-h-[600px] bg-gray-900 text-white ">
         <div className="w-full lg:w-[30%] border-r-[1px] border-white  p-4 gap-5">
           <div className="h-[80%] overflow-y-auto">
-            <UserInRoom player={myRoomData.host} isHost={true} />
+            <UserInRoom player={roomData?.host} isHost={true} />
             {playersKeys?.map((playerKey) => (
               <div key={playerKey}>
-                <UserInRoom player={myRoomData.members[key]} isHost={false} />
+                <UserInRoom
+                  player={roomData?.members[playerKey]}
+                  isHost={false}
+                />
               </div>
             ))}
           </div>
@@ -110,7 +115,7 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
           <div className="h-[10%] relative">
             <RoomMessageInput
               isSocketConnected={isSocketConnected}
-              myRoomData={myRoomData.id}
+              roomData={roomData?.id}
             />
           </div>
         </div>

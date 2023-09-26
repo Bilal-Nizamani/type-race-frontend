@@ -9,7 +9,7 @@ const RoomListContainer = () => {
   const dispatch = useDispatch();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   useEffect(() => {
-    if (!isSocketConnected) socketService.connect("roomlist");
+    if (!isSocketConnected) socketService.connect(true);
     socketService.onConnect(() => {
       socketService.socket.emit("player_info", {
         userName: "bila" + Math.random(),

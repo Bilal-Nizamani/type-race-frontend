@@ -14,7 +14,7 @@ const RoomList = ({ isSocketConnected }) => {
 
   const handleJoinRoom = (room) => {
     if (isSocketConnected) {
-      socketService.socket.emit("manual_join_room", { roomId: room.id });
+      socketService.socket.emit("manual_join_room", room.id);
       setMyRoomData(room);
       setIsInRoom(true);
     }
@@ -101,6 +101,10 @@ const RoomList = ({ isSocketConnected }) => {
         setMyRoomData(newRoom);
         setIsInRoom(true);
       });
+      socket.on("room_joined", (joinedRoom) => {
+        setMyRoomData(joinedRoom);
+        setIsInRoom(true);
+      });
     }
   }, [isSocketConnected]);
 
@@ -143,6 +147,7 @@ const RoomList = ({ isSocketConnected }) => {
           Create Room
         </button>
       )}
+      <div> Total Rooms: {allRooms?.keys?.length}</div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
         {allRooms.keys?.map((roomId) => {
           return (
@@ -156,6 +161,10 @@ const RoomList = ({ isSocketConnected }) => {
                 </h2>
                 <p className="text-gray-400">
                   Host: {allRooms.rooms[roomId]?.host?.name}
+                </p>
+                <p className="text-gray-400">
+                  Players:
+                  {Object.keys(allRooms.rooms[roomId].members).length + 1}
                 </p>
               </div>
               {!isInRoom ? (

@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import socketService from "@/config/socket";
 
 const CreateRoom = ({ getCreateRoomPopupDisplay, isSocketConnected }) => {
+  const [roomName, setRoomName] = useState("");
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isSocketConnected)
       socketService.socket.emit("manual_create_room", {
-        roomName: "Only UpTo 50wmp",
+        roomName: roomName,
       });
     getCreateRoomPopupDisplay();
   };
@@ -26,9 +27,13 @@ const CreateRoom = ({ getCreateRoomPopupDisplay, isSocketConnected }) => {
               Room Name
             </label>
             <input
+              value={roomName}
               type="text"
               id="roomName"
               name="roomName"
+              onChange={(e) => {
+                setRoomName(e.target.value);
+              }}
               className="w-full bg-gray-600 border rounded-md px-3 py-2 text-white placeholder-gray-400 outline-none focus:ring focus:ring-blue-300"
               placeholder="Enter room name"
             />
