@@ -3,33 +3,27 @@ import React, { useState, useEffect } from "react";
 import RoomMessageInput from "./RoomMessageInput";
 import socketService from "@/config/socket";
 import UserInRoom from "./UserInRoom";
+import { useSelector } from "react-redux";
 
 const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
-  const dummyMessages = [
-    {
-      name: "Bilal",
-      message: "Working Typing race game",
-    },
-    {
-      name: "Ehtsam",
-      message: "ssasdfasdf",
-    },
-  ];
-  const [messages, setMessages] = useState(dummyMessages);
+  const [messages, setMessages] = useState([]);
   const [playersKeys, setPlayersKeys] = useState([]);
   const [roomData, setRoomData] = useState({});
+  const myData = useSelector((state) => {
+    return state.userProfileData;
+  });
   useEffect(() => {
     if (isSocketConnected) {
-      socketService.socket.on("all_messages", (allMessages) => {
-        setMessages(allMessages);
-      });
       socketService.socket.on("someone_joined_room", (userName) => {
         setMessages((oldMessages) => {
-          const upDatedMessages = [...oldMessages].push({
-            name: "none",
-            messag: `${userName} joined the room`,
-          });
-          return;
+          const upDatedMessages = [
+            ...oldMessages,
+            {
+              name: "none",
+              messag: `${userName} joined the room`,
+            },
+          ];
+          return upDatedMessages;
         });
       });
       socketService.socket.on("room_data_changed", (room) => {
@@ -41,6 +35,12 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
         setPlayersKeys(arrayOfPlayersKeys);
 
         setRoomData(room);
+      });
+      socketService.socket.on("new_message_added", (message) => {
+        setMessages((oldMessages) => {
+          let updateMessages = [...oldMessages, message];
+          return updateMessages;
+        });
       });
     }
   }, [isSocketConnected]);
@@ -66,13 +66,14 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
       </div>
       <div className="m-auto flex flex-col lg:flex-row w-[90%] border-[1px] min-h-[600px] bg-gray-900 text-white ">
         <div className="w-full lg:w-[30%] border-r-[1px] border-white  p-4 gap-5">
-          <div className="h-[80%] overflow-y-auto">
-            <UserInRoom player={roomData?.host} isHost={true} />
+          <div className="h-[80%] ">
+            <UserInRoom player={roomData?.host} isHost={true} myData={myData} />
             {playersKeys?.map((playerKey) => (
               <div key={playerKey}>
                 <UserInRoom
                   player={roomData?.members[playerKey]}
                   isHost={false}
+                  myData={myData}
                 />
               </div>
             ))}
@@ -93,23 +94,35 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
           </div>
         </div>
         <div className="w-full lg:w-[70%] flex justify-between flex-col">
-          <div className="h-[90%] max-h-[600px] overflow-y-scroll bg-gray-800 p-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
-            {messages.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-start space-x-2 text-white"
-              >
-                <div className="bg-blue-500 p-2 rounded-full w-8 h-8 flex items-center justify-center">
-                  {item.name.charAt(0)}
-                </div>
-                <div>
-                  <span className="font-semibold">{item.name}:</span>
-                  <div className="bg-gray-700 rounded-md p-2">
-                    {item.message}
+          <div className=" h-[50vh] overflow-y-auto bg-gray-800 p-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+            {messages &&
+              messages.map((item, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="flex items-start text-white space-x-2 "
+                  >
+                    <div className="bg-blue-500 p-2 rounded-full w-8 h-8 flex items-center justify-center">
+                      {item.name.charAt(0)}
+                    </div>
+                    <div>
+                      <span
+                        style={
+                          myData.userName === item.userName
+                            ? { color: "rgba(59 130 246)" }
+                            : { color: "white" }
+                        }
+                        className="font-semibold"
+                      >
+                        {item.name}:
+                      </span>
+                      <div className="bg-gray-700 rounded-md p-2">
+                        {item.message}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })}
           </div>
 
           <div className="h-[10%] relative">

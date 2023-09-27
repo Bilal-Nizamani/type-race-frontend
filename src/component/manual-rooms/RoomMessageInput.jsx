@@ -6,10 +6,8 @@ const RoomMessageInput = ({ isSocketConnected, roomId }) => {
 
   const handleSendMessage = () => {
     if (isSocketConnected)
-      socketService.socket.emit("manual_new_message", {
-        roomId: roomId,
-        message: myMessage,
-      });
+      socketService.socket.emit("manual_new_message", myMessage);
+    setMyMessage("");
   };
 
   return (

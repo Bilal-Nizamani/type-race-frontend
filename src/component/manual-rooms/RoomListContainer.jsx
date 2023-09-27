@@ -4,19 +4,24 @@ import RoomList from "./RoomList";
 import { useDispatch } from "react-redux";
 import { storeConnection } from "@/redux-store/features/socketConnetionSlice";
 import socketService from "@/config/socket";
-
+import { addUserData } from "@/redux-store/features/userProfileSlice";
 const RoomListContainer = () => {
   const dispatch = useDispatch();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   useEffect(() => {
     if (!isSocketConnected) socketService.connect(true);
+    const randomNumbers = Math.floor(10000 + Math.random() * 100000); // Generates a random 5-digit number
+
     socketService.onConnect(() => {
-      socketService.socket.emit("player_info", {
+      let playerData = {
         userName: "bila" + Math.random(),
-        name: "Bilal Nizamani",
-        lever: 1,
+        name: "b" + randomNumbers,
+        level: 1,
         averageWpm: Math.random() * 100 + 20,
-      });
+      };
+      dispatch(addUserData(playerData));
+      socketService.socket.emit("player_info", playerData);
+
       setIsSocketConnected(true);
       dispatch(storeConnection({ roomListConnection: true }));
     });

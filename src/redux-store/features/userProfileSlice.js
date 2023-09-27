@@ -1,11 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  nickName: 0,
+  name: "",
   userName: "",
-  email: "",
-  password: "",
-  avtar: "",
+  averageWpm: 0,
+  level: 1,
+  avtar: 1,
   awards: "",
 };
 
@@ -13,11 +13,11 @@ export const userDataSlice = createSlice({
   name: "user-datsa",
   initialState,
   reducers: {
-    addGameData: (state, action) => {
-      return { ...action.payload };
+    addUserData: (state, action) => {
+      return { ...state, ...action.payload };
     },
   },
 });
 
-export const { addGameData } = userDataSlice.actions;
+export const { addUserData } = userDataSlice.actions;
 export default userDataSlice.reducer;
