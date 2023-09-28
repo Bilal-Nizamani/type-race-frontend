@@ -9,9 +9,11 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
   const [messages, setMessages] = useState([]);
   const [playersKeys, setPlayersKeys] = useState([]);
   const [roomData, setRoomData] = useState({});
+
   const myData = useSelector((state) => {
     return state.userProfileData;
   });
+
   useEffect(() => {
     if (isSocketConnected) {
       socketService.socket.on("someone_joined_room", (userName) => {
@@ -27,7 +29,6 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
         });
       });
       socketService.socket.on("room_data_changed", (room) => {
-        console.log(room);
         const arrayOfPlayersKeys = [];
         for (let key in room.members) {
           arrayOfPlayersKeys.push(key);
@@ -58,6 +59,8 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
     setRoomData(myRoomData);
   }, [myRoomData]);
 
+  console.log(playersKeys.length > 0);
+
   return (
     <div className="my-4 w-full p-3">
       <div className=" text-center text-blue-400   italic text-xl">
@@ -87,7 +90,12 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
             {roomData?.host?.userName === myData?.userName && (
               <button
                 onClick={handleStartRace}
-                className="bg-blue-500 hover:bg-blue-600 text-white w-full font-bold py-2 px-4 rounded focus:outline-none"
+                className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none ${
+                  playersKeys.length < 1
+                    ? "cursor-not-allowed opacity-50"
+                    : " hover:bg-blue-600"
+                }`}
+                disabled={playersKeys.length < 1}
               >
                 Start Race
               </button>

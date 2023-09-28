@@ -14,7 +14,7 @@ const MainPage = () => {
 
         <Link href="rooms">
           <div className="bg-gray-800 rounded-lg p-4  hover:text-blue-600 transition duration-300  hover:scale-105">
-            Multiplayer Auto Room Matching
+            Multiplayer manual Room Matching
           </div>
         </Link>
 
