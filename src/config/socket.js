@@ -1,53 +1,20 @@
 import io from "socket.io-client";
 
-// const socket = io("http://localhost:3001");
-// socket.on("connect_error", (err) => {
-//   console.log(`connect_error due to ${err.message}`);
-// });
-
-// export default socket;
-
-// const socketService = {
-//   socket: null,
-
-//   connect: function (message) {
-//     try {
-//       console.log("adfasdf");
-//       this.socket = io("http://localhost:3001");
-
-//       if (!this.socket) {
-//         throw new Error("didnt got any socket");
-//       }
-
-//       this.socket.on("connect", () => {
-//         console.log("connected", message);
-//       });
-
-//       this.socket.on("connect_error", (err) => {
-//         throw new Error("errs");
-//       });
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   },
-// };
-
-// export default socketService;
-
 const socketService = {
   socket: null,
   connectCallbacks: [],
 
-  connect: function (message) {
+  connect: function (isManualRoom) {
     try {
-      this.socket = io("http://localhost:3001");
+      if (isManualRoom) this.socket = io("http://localhost:3001/manual-rooms");
+      else this.socket = io("http://localhost:3001");
 
       if (!this.socket) {
         throw new Error("didnt get any socket");
       }
 
       this.socket.on("connect", () => {
-        console.log("connected", message);
+        console.log("connected", isManualRoom);
         // Call any registered connect callbacks
 
         this.callConnectCallbacks(); // Call the function here

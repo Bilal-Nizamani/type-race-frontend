@@ -4,6 +4,7 @@ import socketShareDatasSlice from "./features/socketShareDatasSlice";
 import roomConnectedPlayersDataSlice from "./features/roomConnectedPlayersDataSlice";
 import gamePlaySlice from "./features/gamePlaySlice";
 import socketConnectionSlice from "./features/socketConnetionSlice";
+import userProfileSlice from "./features/userProfileSlice";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     roomConnectedPlayersData: roomConnectedPlayersDataSlice,
     gamePlayData: gamePlaySlice,
     socketConnection: socketConnectionSlice,
+    userProfileData: userProfileSlice,
   },
 });
 

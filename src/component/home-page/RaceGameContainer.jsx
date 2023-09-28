@@ -19,7 +19,7 @@ const RaceGameContainer = () => {
 
   useEffect(() => {
     if (!isConnected) {
-      socketService.connect("raceGAme");
+      socketService.connect(false);
     }
     socketService.onConnect(() => {
       setIsConnected(true);

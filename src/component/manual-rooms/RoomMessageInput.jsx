@@ -1,11 +1,13 @@
 import socketService from "@/config/socket";
 import React, { useEffect, useState } from "react";
 
-const RoomMessageInput = ({ isSocketConnected }) => {
+const RoomMessageInput = ({ isSocketConnected, roomId }) => {
   const [myMessage, setMyMessage] = useState("");
 
   const handleSendMessage = () => {
-    if (isSocketConnected) socketService.socket.emit("manual_new_message", {});
+    if (isSocketConnected)
+      socketService.socket.emit("manual_new_message", myMessage);
+    setMyMessage("");
   };
 
   return (
