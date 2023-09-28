@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ContextMenu from "./ContextMenu";
 
-const UserInRoom = ({ player, isHost, myData }) => {
+const UserInRoom = ({ player, isHost, myData, amIHost }) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   const openUser = (thePlayer) => {
@@ -14,8 +14,10 @@ const UserInRoom = ({ player, isHost, myData }) => {
       onClick={() => {
         openUser(player);
       }}
-      className={`flex mb-5 cursor-pointer relative hover:bg-[rgba(66,84,171,0.5)] bg-[rgba(66,84,171,0.2)]  ${
-        isContextMenuOpen ? "rounded-t-lg" : "rounded-lg"
+      className={`flex mb-5 cursor-pointer relative     ${
+        isContextMenuOpen
+          ? "rounded-t-lg bg-[rgba(66,84,171,0.5)]"
+          : "rounded-lg bg-[rgba(66,84,171,0.2)] hover:bg-[rgba(66,84,171,0.5)] "
       }  items-center justify-center space-x-2  py-2`}
     >
       <div
@@ -38,7 +40,12 @@ const UserInRoom = ({ player, isHost, myData }) => {
       >
         {player?.userName} {isHost ? "👑" : ""}
       </span>
-      <ContextMenu isContextMenuOpen={isContextMenuOpen} playerData={player} />
+      <ContextMenu
+        isContextMenuOpen={isContextMenuOpen}
+        playerData={player}
+        myData={myData}
+        amIHost={amIHost}
+      />
     </div>
   );
 };

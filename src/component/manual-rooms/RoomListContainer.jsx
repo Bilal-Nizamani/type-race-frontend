@@ -14,7 +14,7 @@ const RoomListContainer = () => {
 
     socketService.onConnect(() => {
       let playerData = {
-        userName: "bila" + Math.random(),
+        userName: "bila" + randomNumbers,
         name: "b" + randomNumbers,
         level: 1,
         averageWpm: Math.random() * 100 + 20,

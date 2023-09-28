@@ -10,7 +10,7 @@ export const metadata = {
 };
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html className="custom-scrollbar" lang="es">
       <body className={inter.className}>
         <ReduxProvider> {children}</ReduxProvider>
       </body>

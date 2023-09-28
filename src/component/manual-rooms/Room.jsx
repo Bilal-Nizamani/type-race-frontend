@@ -55,7 +55,6 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
       arrayOfPlayersKeys.push(key);
     }
     setPlayersKeys(arrayOfPlayersKeys);
-
     setRoomData(myRoomData);
   }, [myRoomData]);
 
@@ -67,24 +66,32 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
       <div className="m-auto flex flex-col lg:flex-row w-[90%] border-[1px] min-h-[600px] bg-gray-900 text-white ">
         <div className="w-full lg:w-[30%] border-r-[1px] border-white  p-4 gap-5">
           <div className="h-[80%] ">
-            <UserInRoom player={roomData?.host} isHost={true} myData={myData} />
+            <UserInRoom
+              player={roomData?.host}
+              isHost={true}
+              myData={myData}
+              amIHost={roomData?.host?.userName === myData?.userName}
+            />
             {playersKeys?.map((playerKey) => (
               <div key={playerKey}>
                 <UserInRoom
                   player={roomData?.members[playerKey]}
                   isHost={false}
                   myData={myData}
+                  amIHost={roomData?.host?.userName === myData?.userName}
                 />
               </div>
             ))}
           </div>
           <div className="justify-around items-center gap-y-4 flex flex-wrap ">
-            <button
-              onClick={handleStartRace}
-              className="bg-blue-500 hover:bg-blue-600 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-300"
-            >
-              Start Race
-            </button>
+            {roomData?.host?.userName === myData?.userName && (
+              <button
+                onClick={handleStartRace}
+                className="bg-blue-500 hover:bg-blue-600 text-white w-full font-bold py-2 px-4 rounded focus:outline-none"
+              >
+                Start Race
+              </button>
+            )}
             <button
               onClick={handleLeaveRoom}
               className="bg-red-500 hover:bg-red-600 text-white font-bold w-full py-2 px-4 rounded focus:outline-none focus:ring focus:ring-red-300"
@@ -94,7 +101,7 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
           </div>
         </div>
         <div className="w-full lg:w-[70%] flex justify-between flex-col">
-          <div className=" h-[50vh] overflow-y-auto bg-gray-800 p-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+          <div className=" h-[90%] min-h-[50vh] overflow-y-auto  custom-scrollbar bg-gray-800 p-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
             {messages &&
               messages.map((item, index) => {
                 return (

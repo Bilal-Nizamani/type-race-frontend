@@ -5,12 +5,14 @@ import CreateRoom from "./CreateRoom";
 import socketService from "@/config/socket";
 import ButtonList from "./ButtonList";
 import { deleteRoom } from "@/utils/manualRoomsHelperFucntions";
+import KickedPopup from "./KickedPopup";
 const RoomList = ({ isSocketConnected }) => {
   const [isCreateRoomOpen, setCreateRoomOpen] = useState(false);
   const [allRooms, setAllRooms] = useState({});
   const [isInRoom, setIsInRoom] = useState(false);
   const [myRoomData, setMyRoomData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [kickedPopupDisplay, setKickedPoupDisplay] = useState(false);
 
   const handleJoinRoom = (room) => {
     if (isSocketConnected) {
@@ -18,6 +20,10 @@ const RoomList = ({ isSocketConnected }) => {
       setMyRoomData(room);
       setIsInRoom(true);
     }
+  };
+
+  const closePopup = () => {
+    setKickedPoupDisplay(false);
   };
 
   const getCreateRoomPopupDisplay = () => {
@@ -85,6 +91,11 @@ const RoomList = ({ isSocketConnected }) => {
           return updatedRooms;
         });
       });
+      socket.on("got_kicked", () => {
+        setIsInRoom(false);
+        setMyRoomData(null);
+        setKickedPoupDisplay(true);
+      });
 
       socket.on("new_room_added", (newRoom) => {
         setAllRooms((oldRooms) => {
@@ -118,6 +129,7 @@ const RoomList = ({ isSocketConnected }) => {
           handleLeaveRoom={handleLeaveRoom}
         />
       )}
+      {kickedPopupDisplay && <KickedPopup onClose={closePopup} />}
       <div className="w-full max-w-lg mx-auto relative">
         <div className="relative">
           <input
