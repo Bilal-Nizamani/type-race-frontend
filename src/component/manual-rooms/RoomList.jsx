@@ -5,6 +5,7 @@ import CreateRoom from "./CreateRoom";
 import socketService from "@/config/socket";
 import ButtonList from "./ButtonList";
 import { deleteRoom } from "@/utils/manualRoomsHelperFucntions";
+import RaceGame from "../home-page/RaceGame";
 import KickedPopup from "./KickedPopup";
 const RoomList = ({ isSocketConnected }) => {
   const [isCreateRoomOpen, setCreateRoomOpen] = useState(false);
@@ -13,6 +14,7 @@ const RoomList = ({ isSocketConnected }) => {
   const [myRoomData, setMyRoomData] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [kickedPopupDisplay, setKickedPoupDisplay] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
 
   const handleJoinRoom = (room) => {
     if (isSocketConnected) {
@@ -77,6 +79,12 @@ const RoomList = ({ isSocketConnected }) => {
           });
         }
       );
+      socket.on("countdown_timer", (timer) => {
+        console.log(timer);
+      });
+      socket.on("start_game", () => {
+        setIsGameStarted(true);
+      });
 
       socket.on("room_deleted", (roomToDelete) => {
         setAllRooms((oldRooms) => {
@@ -120,87 +128,93 @@ const RoomList = ({ isSocketConnected }) => {
   }, [isSocketConnected]);
 
   return (
-    <div className="max-w-screen-xl mx-auto bg-gray-900 text-white min-h-screen p-4 relative">
-      <h1 className="text-4xl font-semibold text-center mb-8">Room List</h1>
-      {isInRoom && (
-        <Room
-          isSocketConnected={isSocketConnected}
-          myRoomData={myRoomData}
-          handleLeaveRoom={handleLeaveRoom}
-        />
-      )}
-      {kickedPopupDisplay && <KickedPopup onClose={closePopup} />}
-      <div className="w-full max-w-lg mx-auto relative">
-        <div className="relative">
-          <input
-            placeholder="Search Room"
-            value={searchQuery}
-            onChange={handleSearchInputChange}
-            className="w-full bg-gray-800 rounded-md py-3 px-4 pr-10 text-white text-lg placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-500"
-          />
-          <span className="absolute top-0 right-0 h-full flex items-center pr-3 text-gray-400 cursor-pointer">
-            SEARCH
-          </span>
-        </div>
-      </div>
-      <ButtonList />
-
-      {isCreateRoomOpen && (
-        <CreateRoom
-          isSocketConnected={isSocketConnected}
-          getCreateRoomPopupDisplay={getCreateRoomPopupDisplay}
-        />
-      )}
-      {!isInRoom && (
-        <button
-          onClick={handleToggleCreateRoom}
-          className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring focus:ring-green-300 absolute top-4 right-4"
-        >
-          Create Room
-        </button>
-      )}
-      <div> Total Rooms: {allRooms?.keys?.length}</div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-        {allRooms.keys?.map((roomId) => {
-          return (
-            <div
-              key={roomId}
-              className="bg-gray-800 rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition duration-300 transform hover:scale-105"
-            >
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {allRooms.rooms[roomId]?.roomName}
-                </h2>
-                <p className="text-gray-400">
-                  Host: {allRooms.rooms[roomId]?.host?.name}
-                </p>
-                <p className="text-gray-400">
-                  Players:
-                  {Object.keys(allRooms.rooms[roomId].members).length + 1}
-                </p>
-              </div>
-              {!isInRoom ? (
-                <button
-                  onClick={() => {
-                    handleJoinRoom(allRooms.rooms[roomId]);
-                  }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                >
-                  JOIN ROOM
-                </button>
-              ) : (
-                <button
-                  className="font-semibold py-2f px-4 mt-4 rounded-lg bg-gray-300 text-gray-600  cursor-not-allowed"
-                  disabled
-                >
-                  Already In Room
-                </button>
-              )}
+    <>
+      {isGameStarted ? (
+        <RaceGame />
+      ) : (
+        <div className="max-w-screen-xl mx-auto bg-gray-900 text-white min-h-screen p-4 relative">
+          <h1 className="text-4xl font-semibold text-center mb-8">Room List</h1>
+          {isInRoom && (
+            <Room
+              isSocketConnected={isSocketConnected}
+              myRoomData={myRoomData}
+              handleLeaveRoom={handleLeaveRoom}
+            />
+          )}
+          {kickedPopupDisplay && <KickedPopup onClose={closePopup} />}
+          <div className="w-full max-w-lg mx-auto relative">
+            <div className="relative">
+              <input
+                placeholder="Search Room"
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+                className="w-full bg-gray-800 rounded-md py-3 px-4 pr-10 text-white text-lg placeholder-gray-400 focus:outline-none focus:ring focus:ring-blue-500"
+              />
+              <span className="absolute top-0 right-0 h-full flex items-center pr-3 text-gray-400 cursor-pointer">
+                SEARCH
+              </span>
             </div>
-          );
-        })}
-      </div>
-    </div>
+          </div>
+          <ButtonList />
+
+          {isCreateRoomOpen && (
+            <CreateRoom
+              isSocketConnected={isSocketConnected}
+              getCreateRoomPopupDisplay={getCreateRoomPopupDisplay}
+            />
+          )}
+          {!isInRoom && (
+            <button
+              onClick={handleToggleCreateRoom}
+              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring focus:ring-green-300 absolute top-4 right-4"
+            >
+              Create Room
+            </button>
+          )}
+          <div> Total Rooms: {allRooms?.keys?.length}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+            {allRooms.keys?.map((roomId) => {
+              return (
+                <div
+                  key={roomId}
+                  className="bg-gray-800 rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition duration-300 transform hover:scale-105"
+                >
+                  <div>
+                    <h2 className="text-xl font-semibold">
+                      {allRooms.rooms[roomId]?.roomName}
+                    </h2>
+                    <p className="text-gray-400">
+                      Host: {allRooms.rooms[roomId]?.host?.name}
+                    </p>
+                    <p className="text-gray-400">
+                      Players:
+                      {Object.keys(allRooms.rooms[roomId].members).length + 1}
+                    </p>
+                  </div>
+                  {!isInRoom ? (
+                    <button
+                      onClick={() => {
+                        handleJoinRoom(allRooms.rooms[roomId]);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    >
+                      JOIN ROOM
+                    </button>
+                  ) : (
+                    <button
+                      className="font-semibold py-2f px-4 mt-4 rounded-lg bg-gray-300 text-gray-600  cursor-not-allowed"
+                      disabled
+                    >
+                      Already In Room
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
