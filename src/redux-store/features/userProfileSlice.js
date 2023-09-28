@@ -1,26 +1,23 @@
-import { createSlice, } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    nickName:0,
-    userName:'',
-    email:'',
-    password:'',
-    avtar:'',
-    awards:'',
-
-}
+  name: "",
+  userName: "",
+  averageWpm: 0,
+  level: 1,
+  avtar: 1,
+  awards: "",
+};
 
 export const userDataSlice = createSlice({
-    name:'auth',
-    initialState,
-    reducers:{
-        addGameData:(state, action)=>{
-        return {...action.payload}
-        },
- 
-    }
+  name: "user-datsa",
+  initialState,
+  reducers: {
+    addUserData: (state, action) => {
+      return { ...state, ...action.payload };
+    },
+  },
+});
 
-})
-
-export const {addGameData} = userDataSlice.actions
-export default userDataSlice.reducer
+export const { addUserData } = userDataSlice.actions;
+export default userDataSlice.reducer;
