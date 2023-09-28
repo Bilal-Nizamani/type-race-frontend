@@ -20,7 +20,6 @@ const CarRoad = memo(function CarRoad() {
     const writtenTextPercent =
       (arrayOfwrittenWords?.length * 100) / orginalString?.split(" ").length;
 
-    console.log(writtenTextPercent);
     if (writtenTextPercent > 0) {
       dispatch(addUserShareData({ carPosition: writtenTextPercent / 100 }));
     }
@@ -51,22 +50,21 @@ const CarRoad = memo(function CarRoad() {
       <div className="h-3  w-full mt-10 pl-[100px]  bg-slate-300  transform -translate-y-1/2">
         <div
           style={{
-            marginLeft: `calc(${myData.carPosition * 100}% - 70px)`,
+            marginLeft: `calc(${myData.carPosition * 100}% - 85px)`,
           }}
           className=" w-16  transition-all duration-300 ease-in-out"
         >
           <div className="mt-[-3rem]">
-            <Image
-              width={100}
-              height={100}
-              src={`/${car}.png`}
-              alt="asdfasdf"
-            />
+            <Image width={100} height={100} src={`/${car}.png`} alt="error" />
           </div>
         </div>
       </div>
       {otherPlayersData?.map((item) => {
-        return <CarComponent key={item.userName} userData={item} />;
+        return (
+          <div key={item.userName}>
+            <CarComponent userData={item} />
+          </div>
+        );
       })}
     </div>
   );

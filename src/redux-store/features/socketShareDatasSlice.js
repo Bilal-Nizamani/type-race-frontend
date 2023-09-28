@@ -12,7 +12,7 @@ const initialState = {
 };
 
 export const socketShareDatasSlice = createSlice({
-  name: "auth",
+  name: "game-data-to-send",
   initialState,
   reducers: {
     addUserShareData: (state, action) => {

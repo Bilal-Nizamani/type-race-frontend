@@ -6,7 +6,7 @@ import {
   modifyString,
   rmSpce,
 } from "@/utils/serviceFunction";
-import socket from "@/config/socket";
+import socketService from "@/config/socket";
 import { useDispatch } from "react-redux";
 import { addGamePlayData } from "@/redux-store/features/gamePlaySlice";
 const RaceInput = memo(function RaceInput({
@@ -14,6 +14,7 @@ const RaceInput = memo(function RaceInput({
   getCurrText,
   gameEnd,
   gameEnder,
+  isSocketConnected,
 }) {
   const inputRef = useRef(null);
   const dispatch = useDispatch();
@@ -29,16 +30,18 @@ const RaceInput = memo(function RaceInput({
   const [currText, setCurrText] = useState("");
 
   useEffect(() => {
-    socket.on("match_found", (raceText) => {
-      setOriginalStringArray(raceText.split(" "));
-      setWrongWords([]);
-      setWrongsLetters([]);
-      setOrginalString(raceText);
-      setRightText([]);
-      setArrayOfwrittenWords([]);
-      setCurrText(raceText);
-    });
-  }, []);
+    if (isSocketConnected) {
+      socketService.socket.on("match_found", (raceText) => {
+        setOriginalStringArray(raceText.split(" "));
+        setWrongWords([]);
+        setWrongsLetters([]);
+        setOrginalString(raceText);
+        setRightText([]);
+        setArrayOfwrittenWords([]);
+        setCurrText(raceText);
+      });
+    }
+  }, [isSocketConnected]);
 
   useEffect(() => {
     getCurrText(currText);
@@ -217,11 +220,13 @@ const RaceInput = memo(function RaceInput({
                 mistakeLetters: wrongText,
               });
               // Return the updated state
+              setIsMistakeDeleted(false);
               return updatedState;
             } else if (isWordSame && isLongerMistake) {
               // Update the mistake letters in the last mistake object
               lastMistake.mistakeLetters = wrongText;
               // Return the updated state
+              setIsMistakeDeleted(false);
               return updatedState;
             } else {
               // Return the original state as no changes are needed
@@ -249,10 +254,10 @@ const RaceInput = memo(function RaceInput({
       ref={inputRef}
       type="text"
       disabled={gameEnd}
-      onPaste={() => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
       value={currUserText}
       onChange={handleInput}
-      className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px] max-w-[700px] w-[100%] mx-2 ${
+      className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px]  w-full  mx-2 ${
         gameEnd ? "border-[1px] select-none pointer-events-none" : ""
       }`}
     />

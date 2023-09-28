@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, memo } from "react";
-import socket from "@/config/socket";
+import socketService from "@/config/socket";
+import { useSelector } from "react-redux";
 
 const GameTimer = memo(function GameTimer({
   getTimer,
@@ -9,17 +10,22 @@ const GameTimer = memo(function GameTimer({
   isRaceCompleted,
 }) {
   const [roomTimer, setRoomTimer] = useState(200);
+  const isSocketConnected = useSelector(
+    (state) => state.socketConnection.autoRoomConnection
+  );
 
   useEffect(() => {
-    socket.on("timer_update", (timerUpdate) => {
-      console.log(timerUpdate);
-      setRoomTimer(timerUpdate);
-    });
+    if (isSocketConnected) {
+      socketService.socket.on("timer_update", (timerUpdate) => {
+        setRoomTimer(timerUpdate);
+      });
 
-    socket.on("room_left", () => {
-      setRoomTimer(200);
-    });
-  }, [getTimer]);
+      socketService.socket &&
+        socketService.socket.on("room_left", () => {
+          setRoomTimer(200);
+        });
+    }
+  }, [getTimer, isSocketConnected]);
 
   useEffect(() => {
     if (!isRaceCompleted) {
@@ -31,11 +37,11 @@ const GameTimer = memo(function GameTimer({
     <div className="flex justify-between">
       <div
         style={{
-          color: roomTimer < 10 && isGameBeingPlayed ? "red" : "gray",
+          color: roomTimer < 10 && isGameBeingPlayed ? "red" : "white",
         }}
-        className="text-2xl  mb-6"
+        className="text-lg font-bold  "
       >
-        {roomTimer}
+        Seconds: {roomTimer}
       </div>
     </div>
   );

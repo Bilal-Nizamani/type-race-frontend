@@ -1,11 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  wpmArray: [],
+  wpmObj: {},
   wpm: 0,
   givenString: "",
   writenString: [],
-  secondsArray: [],
+  totalMistakes: 0,
   typeTime: "",
   accuracy: 0,
   gameType: "normal",
@@ -14,7 +14,7 @@ const initialState = {
 };
 
 export const gameDataSlice = createSlice({
-  name: "auth",
+  name: "game-data",
   initialState,
   reducers: {
     addGameData: (state, action) => {

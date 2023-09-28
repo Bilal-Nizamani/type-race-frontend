@@ -31,8 +31,7 @@ const MyLineChart = memo(function MyLineChart({ isRaceCompleted }) {
   useEffect(() => {
     if (isRaceCompleted && gameData) {
       const updatedPlayedGameData = {
-        wpmArray: gameData.wpmArray,
-        secondsArray: gameData.secondsArray,
+        wpmObj: gameData.wpmObj,
         wpm: gameData.wpm,
         givenString: gameData.orginalString,
         writenString: gameData.rightText,
@@ -43,38 +42,41 @@ const MyLineChart = memo(function MyLineChart({ isRaceCompleted }) {
         mistakes: gameData.wrongsLetters,
         place: "1/4",
       };
+      let secondAndWpmArrays = processArray(updatedPlayedGameData.wpmObj);
+
+      console.log(updatedPlayedGameData.wpmObj);
       setPlayedGameData({
         ...updatedPlayedGameData,
-        secondsArray: processArray(updatedPlayedGameData.secondsArray),
-        wpmArray: processArray(updatedPlayedGameData.wpmArray),
+        ...secondAndWpmArrays,
       });
     }
   }, [gameData, isRaceCompleted]);
 
   return (
     <>
-      <ScoreBoard playedGameData={playedGameData} />
+      <ScoreBoard playedGameData={gameData} />
       <div className=" w-full shadow-sm shadow-white p-2 rounded-md flex justify-center  mt-5 ">
         <Line
           data={{
-            labels: playedGameData.secondsArray,
+            labels: playedGameData.secondsArray, // X-axis labels
             datasets: [
               {
-                label: "Wpm",
-                data: playedGameData.wpmArray,
+                label: "Wpm", // Label for the dataset
+                data: playedGameData.wpmArray, // Data points for the Y-axis
                 cubicInterpolationMode: "default",
                 borderColor: "rgba(54, 162, 235, 0.8)",
-                backgroundColor: "rgba(54, 162, 235, 0.2)", // Set your desired background color
-                pointRadius: 6, // Increase the point size (adjust the value as needed)
-
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                pointRadius: 6,
                 tension: 0.2,
               },
             ],
           }}
           options={{
+            responsive: true, // Make the chart responsive
+            maintainAspectRatio: false, // Allow stretching
             plugins: {
               legend: {
-                display: false, // Hide legend
+                display: false, // Hide the legend
               },
             },
             scales: {
@@ -84,7 +86,7 @@ const MyLineChart = memo(function MyLineChart({ isRaceCompleted }) {
                   color: "rgba(54, 162, 235, 0.2)",
                 },
                 ticks: {
-                  color: "white", // Set the color of the x-axis labels
+                  color: "white",
                 },
               },
               y: {
@@ -93,11 +95,12 @@ const MyLineChart = memo(function MyLineChart({ isRaceCompleted }) {
                   color: "rgba(54, 162, 235, 0.4)",
                 },
                 ticks: {
-                  color: "white", // Set the color of the y-axis labels
+                  color: "white",
                 },
               },
             },
           }}
+          height={400} // Specify a fixed height for the chart container
         />
       </div>
     </>
