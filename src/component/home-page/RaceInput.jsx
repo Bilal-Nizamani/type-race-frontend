@@ -248,19 +248,48 @@ const RaceInput = memo(function RaceInput({
       console.log(err);
     }
   };
+  let totalMistakes = 0;
+  if (wrongsLetters?.length > 0) {
+    wrongsLetters?.forEach((item) => {
+      totalMistakes += item.mistakeLetters.length;
+    });
+  }
+
+  const accuracyPercent =
+    totalMistakes > 0
+      ? Math.floor(
+          ((orginalString.length - totalMistakes) / orginalString.length) * 100
+        )
+      : 100;
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      disabled={gameEnd}
-      onPaste={(e) => e.preventDefault()}
-      value={currUserText}
-      onChange={handleInput}
-      className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px]  w-full  mx-2 ${
-        gameEnd ? "border-[1px] select-none pointer-events-none" : ""
-      }`}
-    />
+    <>
+      <div className="flex flex-wrap gap-x-4">
+        {wrongWords?.map((word, i) => {
+          return (
+            <div key={i} className=" font-bold text-18px text-red-600">
+              {" "}
+              {word}{" "}
+            </div>
+          );
+        })}
+      </div>
+      <div className="font-bold text-18px text-green-600">
+        {" "}
+        {accuracyPercent}%
+      </div>
+      <input
+        ref={inputRef}
+        type="text"
+        disabled={gameEnd}
+        onPaste={(e) => e.preventDefault()}
+        value={currUserText}
+        onChange={handleInput}
+        className={`p-2 border-2 text-3xl border-gray-900 text-green-600 min-h-[70px]  w-full  mx-2 ${
+          gameEnd ? "border-[1px] select-none pointer-events-none" : ""
+        }`}
+      />
+    </>
   );
 });
 

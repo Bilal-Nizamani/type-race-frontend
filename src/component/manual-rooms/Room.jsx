@@ -5,7 +5,7 @@ import socketService from "@/config/socket";
 import UserInRoom from "./UserInRoom";
 import { useSelector } from "react-redux";
 
-const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
+const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
   const [messages, setMessages] = useState([]);
   const [playersKeys, setPlayersKeys] = useState([]);
   const [roomData, setRoomData] = useState({});
@@ -50,6 +50,9 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
     if (isSocketConnected) socketService.socket.emit("manual_start_race", {});
     console.log("startRAce");
   };
+  const cancelRoomCounting = () => {
+    if (isSocketConnected) socketService.socket.emit("cancel_counting", {});
+  };
   useEffect(() => {
     const arrayOfPlayersKeys = [];
     for (let key in myRoomData.members) {
@@ -87,19 +90,33 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData }) => {
             ))}
           </div>
           <div className="justify-around items-center gap-y-4 flex flex-wrap ">
-            {roomData?.host?.userName === myData?.userName && (
-              <button
-                onClick={handleStartRace}
-                className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none ${
-                  playersKeys.length < 1
-                    ? "cursor-not-allowed opacity-50"
-                    : " hover:bg-blue-600"
-                }`}
-                disabled={playersKeys.length < 1}
-              >
-                Start Race
-              </button>
-            )}
+            {timer < 1
+              ? roomData?.host?.userName === myData?.userName && (
+                  <button
+                    onClick={handleStartRace}
+                    className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none ${
+                      playersKeys.length < 1
+                        ? "cursor-not-allowed opacity-50"
+                        : " hover:bg-blue-600"
+                    }`}
+                    disabled={playersKeys.length < 1}
+                  >
+                    Start Race
+                  </button>
+                )
+              : roomData?.host?.userName === myData?.userName && (
+                  <button
+                    onClick={cancelRoomCounting}
+                    className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none ${
+                      playersKeys.length < 1
+                        ? "cursor-not-allowed opacity-50"
+                        : " hover:bg-blue-600"
+                    }`}
+                    disabled={playersKeys.length < 1}
+                  >
+                    Cancel
+                  </button>
+                )}
             <button
               onClick={handleLeaveRoom}
               className="bg-red-500 hover:bg-red-600 text-white font-bold w-full py-2 px-4 rounded focus:outline-none focus:ring focus:ring-red-300"

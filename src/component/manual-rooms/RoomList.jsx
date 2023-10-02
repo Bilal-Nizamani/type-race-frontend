@@ -15,6 +15,7 @@ const RoomList = ({ isSocketConnected }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [kickedPopupDisplay, setKickedPoupDisplay] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
+  const [timer, setTimer] = useState(0);
 
   const handleJoinRoom = (room) => {
     if (isSocketConnected) {
@@ -80,7 +81,7 @@ const RoomList = ({ isSocketConnected }) => {
         }
       );
       socket.on("countdown_timer", (timer) => {
-        console.log(timer);
+        setTimer(timer);
       });
       socket.on("start_game", () => {
         setIsGameStarted(true);
@@ -124,6 +125,9 @@ const RoomList = ({ isSocketConnected }) => {
         setMyRoomData(joinedRoom);
         setIsInRoom(true);
       });
+      socket.on("time_stoped", () => {
+        setTimer(0);
+      });
     }
   }, [isSocketConnected]);
 
@@ -139,8 +143,10 @@ const RoomList = ({ isSocketConnected }) => {
               isSocketConnected={isSocketConnected}
               myRoomData={myRoomData}
               handleLeaveRoom={handleLeaveRoom}
+              timer={timer}
             />
           )}
+
           {kickedPopupDisplay && <KickedPopup onClose={closePopup} />}
           <div className="w-full max-w-lg mx-auto relative">
             <div className="relative">
@@ -163,6 +169,14 @@ const RoomList = ({ isSocketConnected }) => {
               getCreateRoomPopupDisplay={getCreateRoomPopupDisplay}
             />
           )}
+          <div
+            className={`${
+              timer < 1 ? "hidden" : ""
+            }   text-white bg-black  p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
+     text-4xl font-bold`}
+          >
+            {timer}
+          </div>
           {!isInRoom && (
             <button
               onClick={handleToggleCreateRoom}
