@@ -126,13 +126,13 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
           </div>
         </div>
         <div className="w-full lg:w-[70%] flex justify-between flex-col">
-          <div className=" h-[90%] min-h-[50vh] overflow-y-auto  custom-scrollbar bg-gray-800 p-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+          <div className=" max-h-[50vh]  min-h-[50vh] overflow-y-auto  custom-scrollbar bg-gray-800 p-2 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
             {messages &&
               messages.map((item, index) => {
                 return (
                   <div
                     key={index}
-                    className="flex items-start text-white space-x-2 "
+                    className="flex items-start  text-white space-x-2 "
                   >
                     <div className="bg-blue-500 p-2 rounded-full w-8 h-8 flex items-center justify-center">
                       {item.name.charAt(0)}

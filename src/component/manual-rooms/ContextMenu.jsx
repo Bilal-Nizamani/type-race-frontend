@@ -4,9 +4,8 @@ import { useSelector } from "react-redux";
 
 const ContextMenu = ({ isContextMenuOpen, playerData, myData, amIHost }) => {
   const isSocketConnected = useSelector(
-    (state) => state.socketConnection.roomListConnection
+    (state) => state.socketConnection.connection
   );
-
   const [isVisible, setIsVisible] = useState(true);
 
   const onKick = () => {

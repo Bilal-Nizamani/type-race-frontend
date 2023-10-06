@@ -13,13 +13,15 @@ import _isEqual from "lodash/isEqual";
 import AllRoomPlayersScoreBoard from "./AllRoomPlayersScoreBoard";
 import socketService from "@/config/socket";
 
-const RaceGame = () => {
+// gameMode cane be
+// 'single-player', 'manual-room', 'auto-room'
+const RaceGame = ({ gameMode, handleLeaveRoom }) => {
   const currentSocketSharedData = useSelector(
     (state) => state.socketSharedData,
     shallowEqual
   );
   const isSocketConnected = useSelector(
-    (state) => state.socketConnection.autoRoomConnection
+    (state) => state.socketConnection.connection
   );
   const userShareData = useSelector((state) => state.socketSharedData);
   const previousSocketSharedDataRef = useRef(currentSocketSharedData);
@@ -40,6 +42,7 @@ const RaceGame = () => {
   const [isGameBeingPlayed, setIsGameBeingPlayed] = useState(false);
 
   // End the game
+
   const gameEnder = useCallback((startingGameText, checkIsGameComplete) => {
     setGameEnd(true);
     setIsGameBeingPlayed(false);
@@ -114,13 +117,21 @@ const RaceGame = () => {
   ]);
 
   useEffect(() => {
-    if (isCounting || isGameBeingPlayed) {
-      isSocketConnected &&
-        socketService.socket.on("room_players_data", (playersData) => {
-          const upDatedPlayers = playersData;
-          dispatch(addPlayingPlayersData(upDatedPlayers));
-        });
+    if (!isSocketConnected || (!isCounting && !isGameBeingPlayed)) {
+      return; // If not connected or not counting and not in-game, exit early
     }
+
+    const handleRoomPlayersData = (playersData) => {
+      const updatedPlayers = playersData;
+      dispatch(addPlayingPlayersData(updatedPlayers));
+    };
+
+    socketService.socket.on("room_players_data", handleRoomPlayersData);
+
+    return () => {
+      // Cleanup the event listener when the component unmounts
+      socketService.socket.off("room_players_data", handleRoomPlayersData);
+    };
   }, [
     isGameBeingPlayed,
     isCounting,
@@ -130,69 +141,77 @@ const RaceGame = () => {
   ]);
 
   useEffect(() => {
+    const gameCompletedOrTimerEnded = () => {
+      setGameEnd(true);
+      gameEnder("Time UP", true);
+      setIsGameBeingPlayed(false);
+      setIsRaceCompleted(true);
+      setRoomGameState("ended");
+    };
+
+    const matchFoundHandler = (raceText) => {
+      setIsGameBeingPlayed(false);
+      gameEnder(raceText, false);
+      setIsCounting(true);
+      setIsWaiting(false);
+    };
+
+    const roomLeftHandler = () => {
+      setIsWaiting(false);
+      setGameEnd(true);
+      setIsCounting(false);
+      setIsGameBeingPlayed(false);
+      setCount(0);
+      setIsRaceCompleted(false);
+      setCurrText("");
+      changeDatatoDefault();
+      setRoomGameState("not-started");
+    };
+
+    const lefAloneInTheRoomHandler = () => {
+      setCount(0);
+      setCheckDataSend(true);
+      changeDatatoDefault();
+      setIsWaiting(true);
+    };
+
+    const countingCompletedHandler = (socket) => {
+      setIsCounting(false);
+      setIsGameBeingPlayed(true);
+      socket.emit("game_started", {});
+      setGameEnd(false);
+      setCount(0);
+    };
+
+    const countDownTimerHandler = (countTimer) => {
+      setCount(countTimer);
+      setCheckDataSend(true);
+    };
     if (isSocketConnected) {
       const socket = socketService.socket;
-
-      socket.on("match_found", (raceText) => {
-        setIsGameBeingPlayed(false);
-        gameEnder(raceText, false);
-        setIsCounting(true);
-        setIsWaiting(false);
-      });
-      socket.on("room_left", () => {
-        setIsWaiting(false);
-        setGameEnd(true);
-        setIsCounting(false);
-        setIsGameBeingPlayed(false);
-        setCount(0);
-        setIsRaceCompleted(false);
-        setCurrText("");
-        changeDatatoDefault();
-        setRoomGameState("not-started");
-      });
-
-      socket.on("room_created", (roomConfirmation) => {
-        setRoomCreatedMessage(roomConfirmation);
-      });
-
-      socket.on("time_up", () => {
-        setGameEnd(true);
-        gameEnder("Time UP", true);
-        setIsGameBeingPlayed(false);
-        setIsRaceCompleted(true);
-        setRoomGameState("ended");
-      });
-
-      socket.on("waiting", () => {
-        setIsWaiting(true);
-      });
-
-      socket.on("game_completed", () => {
-        setGameEnd(true);
-        gameEnder("Race Ended", true);
-        setIsGameBeingPlayed(false);
-        setIsRaceCompleted(true);
-        setRoomGameState("ended");
-      });
-      socket.on("left_alone", () => {
-        setCount(0);
-        setCheckDataSend(true);
-        changeDatatoDefault();
-        setIsWaiting(true);
-      });
-
-      socket.on("countdown_timer", (countTimer) => {
-        setCount(countTimer);
-        setCheckDataSend(true);
-      });
-
       socket.on("counting_completed", () => {
-        setIsCounting(false);
-        setIsGameBeingPlayed(true);
-        socket.emit("game_started", {});
-        setGameEnd(false);
-        setCount(0);
+        countingCompletedHandler(socket);
       });
+
+      if (gameMode === "auto-room") {
+        socket.on("countdown_timer", countDownTimerHandler);
+
+        socket.on("match_found", matchFoundHandler);
+        socket.on("room_left", roomLeftHandler);
+        socket.on("room_created", (roomConfirmation) => {
+          setRoomCreatedMessage(roomConfirmation);
+        });
+        socket.on("time_up", () => {
+          gameCompletedOrTimerEnded();
+        });
+        socket.on("waiting", () => {
+          setIsWaiting(true);
+        });
+        socket.on("game_completed", () => {
+          gameCompletedOrTimerEnded();
+        });
+        socket.on("left_alone", lefAloneInTheRoomHandler);
+      }
     }
   }, [gameEnder, isSocketConnected]);
 
@@ -251,20 +270,31 @@ const RaceGame = () => {
           />
           <Counter isSocketConnected={isSocketConnected} />
         </div>
-        <button
-          className="mt-2 p-3 px-5 text-[1.5rem] w-full bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          onPaste={(e) => {
-            e.preventDefault();
-          }}
-          onClick={createRoomHandler}
-        >
-          {isWaiting ||
-          isCounting ||
-          isGameBeingPlayed ||
-          roomGameState === "started"
-            ? "Leave Game"
-            : "Play New"}
-        </button>
+        {gameMode === "manual-room" ? (
+          <>
+            <button
+              className="mt-2 p-3 px-5 text-[1.5rem] w-full bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              onClick={handleLeaveRoom}
+            >
+              Leave Game
+            </button>
+          </>
+        ) : (
+          <button
+            className="mt-2 p-3 px-5 text-[1.5rem] w-full bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            onPaste={(e) => {
+              e.preventDefault();
+            }}
+            onClick={createRoomHandler}
+          >
+            {isWaiting ||
+            isCounting ||
+            isGameBeingPlayed ||
+            roomGameState === "started"
+              ? "Leave Game"
+              : "Play New"}
+          </button>
+        )}
         {roomGameState === "ended" && (
           <AllRoomPlayersScoreBoard
             isGameBeingPlayed={isGameBeingPlayed}

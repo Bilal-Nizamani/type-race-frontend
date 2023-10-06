@@ -41,8 +41,10 @@ const RoomList = ({ isSocketConnected }) => {
     if (isSocketConnected) {
       socketService.socket.emit("manual_leave_room");
     }
+    setIsGameStarted(false);
     setMyRoomData(null);
     setIsInRoom(false);
+    setTimer(0);
   };
 
   // Function to handle search input changes
@@ -81,6 +83,7 @@ const RoomList = ({ isSocketConnected }) => {
         }
       );
       socket.on("countdown_timer", (timer) => {
+        console.log(timer);
         setTimer(timer);
       });
       socket.on("start_game", () => {
@@ -133,8 +136,16 @@ const RoomList = ({ isSocketConnected }) => {
 
   return (
     <>
+      <div
+        className={`${
+          timer < 1 ? "hidden" : ""
+        }   text-white bg-black  p-5 top-[3%] left-[47%] rounded-xl w-fit z-50 absolute
+     text-4xl font-bold`}
+      >
+        {timer}
+      </div>
       {isGameStarted ? (
-        <RaceGame />
+        <RaceGame gameMode="manual-room" handleLeaveRoom={handleLeaveRoom} />
       ) : (
         <div className="max-w-screen-xl mx-auto bg-gray-900 text-white min-h-screen p-4 relative">
           <h1 className="text-4xl font-semibold text-center mb-8">Room List</h1>
@@ -169,14 +180,7 @@ const RoomList = ({ isSocketConnected }) => {
               getCreateRoomPopupDisplay={getCreateRoomPopupDisplay}
             />
           )}
-          <div
-            className={`${
-              timer < 1 ? "hidden" : ""
-            }   text-white bg-black  p-5 top-[3%] left-[47%] rounded-xl w-fit absolute
-     text-4xl font-bold`}
-          >
-            {timer}
-          </div>
+
           {!isInRoom && (
             <button
               onClick={handleToggleCreateRoom}

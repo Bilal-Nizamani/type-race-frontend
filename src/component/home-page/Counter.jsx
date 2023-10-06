@@ -51,6 +51,7 @@ const Counter = memo(function Counter() {
   useEffect(() => {
     refServerWpm.current = serverWpm;
   }, [serverWpm]);
+
   useEffect(() => {
     if (!gameEnd) {
       wpmObj.current[speedTestTimer] = refServerWpm.current;
