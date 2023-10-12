@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ContextMenu from "./ContextMenu";
+import { useDispatch } from "react-redux";
 
 const UserInRoom = ({ player, isHost, myData, amIHost }) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -9,6 +10,7 @@ const UserInRoom = ({ player, isHost, myData, amIHost }) => {
       return !old;
     });
   };
+
   return (
     <div
       onClick={() => {

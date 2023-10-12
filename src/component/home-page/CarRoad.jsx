@@ -27,6 +27,7 @@ const CarRoad = memo(function CarRoad() {
 
   useEffect(() => {
     const romPlayersDataArray = [];
+    console.log(romPlData);
     Object.keys(romPlData).forEach((item) => {
       if (romPlData[item].userName === userName) {
         setMyData(romPlData[item]);

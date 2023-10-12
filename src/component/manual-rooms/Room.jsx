@@ -62,8 +62,6 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
     setRoomData(myRoomData);
   }, [myRoomData]);
 
-  console.log(playersKeys.length > 0);
-
   return (
     <div className="my-4 w-full p-3">
       <div className=" text-center text-blue-400   italic text-xl">

@@ -17,7 +17,7 @@ const RaceGameContainer = () => {
     }
     socketService.onConnect(() => {
       setIsConnected(true);
-      dispatch(storeConnection({ connection: true }));
+      dispatch(storeConnection({ connection: true, type: "auto-room" }));
     });
 
     if (isConnected) {

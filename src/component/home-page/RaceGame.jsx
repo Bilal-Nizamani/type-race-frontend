@@ -90,6 +90,10 @@ const RaceGame = ({ gameMode, handleLeaveRoom }) => {
     }
   };
 
+  const getBackToRoom = () => {
+    socketService.socket.emit("get_back_to_room", {});
+  };
+
   useEffect(() => {
     // if cheking if value is not he same when sending socket data
     if (
@@ -127,11 +131,6 @@ const RaceGame = ({ gameMode, handleLeaveRoom }) => {
     };
 
     socketService.socket.on("room_players_data", handleRoomPlayersData);
-
-    return () => {
-      // Cleanup the event listener when the component unmounts
-      socketService.socket.off("room_players_data", handleRoomPlayersData);
-    };
   }, [
     isGameBeingPlayed,
     isCounting,
@@ -192,24 +191,31 @@ const RaceGame = ({ gameMode, handleLeaveRoom }) => {
       socket.on("counting_completed", () => {
         countingCompletedHandler(socket);
       });
+      socket.on("time_up", () => {
+        gameCompletedOrTimerEnded();
+      });
+      socket.on("match_found", matchFoundHandler);
+      socket.on("countdown_timer", countDownTimerHandler);
+
+      socket.on("game_completed", () => {
+        gameCompletedOrTimerEnded();
+      });
+      if (gameMode === "manual-room") {
+        changeDatatoDefault();
+        socket.emit("racegame_mounted", {});
+        setRoomGameState("started");
+      }
 
       if (gameMode === "auto-room") {
-        socket.on("countdown_timer", countDownTimerHandler);
-
-        socket.on("match_found", matchFoundHandler);
         socket.on("room_left", roomLeftHandler);
         socket.on("room_created", (roomConfirmation) => {
           setRoomCreatedMessage(roomConfirmation);
         });
-        socket.on("time_up", () => {
-          gameCompletedOrTimerEnded();
-        });
+
         socket.on("waiting", () => {
           setIsWaiting(true);
         });
-        socket.on("game_completed", () => {
-          gameCompletedOrTimerEnded();
-        });
+
         socket.on("left_alone", lefAloneInTheRoomHandler);
       }
     }
@@ -282,9 +288,6 @@ const RaceGame = ({ gameMode, handleLeaveRoom }) => {
         ) : (
           <button
             className="mt-2 p-3 px-5 text-[1.5rem] w-full bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            onPaste={(e) => {
-              e.preventDefault();
-            }}
             onClick={createRoomHandler}
           >
             {isWaiting ||
@@ -294,6 +297,16 @@ const RaceGame = ({ gameMode, handleLeaveRoom }) => {
               ? "Leave Game"
               : "Play New"}
           </button>
+        )}
+        {gameMode === "manual-room" && roomGameState === "ended" && (
+          <>
+            <button
+              className="mt-2 p-3 px-5 text-[1.5rem] w-full bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              onClick={getBackToRoom}
+            >
+              Go Back To Room
+            </button>
+          </>
         )}
         {roomGameState === "ended" && (
           <AllRoomPlayersScoreBoard

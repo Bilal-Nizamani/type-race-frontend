@@ -82,11 +82,14 @@ const RoomList = ({ isSocketConnected }) => {
           });
         }
       );
-      socket.on("countdown_timer", (timer) => {
-        console.log(timer);
+      socket.on("room_countdown_timer", (timer) => {
         setTimer(timer);
       });
-      socket.on("start_game", () => {
+      socket.on("game_left", () => {
+        setIsGameStarted(false);
+      });
+      socket.on("start_game", (callBack) => {
+        console.log("gameStarted");
         setIsGameStarted(true);
       });
 
@@ -192,6 +195,8 @@ const RoomList = ({ isSocketConnected }) => {
           <div> Total Rooms: {allRooms?.keys?.length}</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
             {allRooms.keys?.map((roomId) => {
+              let selecetedRoom = allRooms.rooms[roomId];
+              console.log(allRooms.rooms[roomId]);
               return (
                 <div
                   key={roomId}
@@ -199,20 +204,20 @@ const RoomList = ({ isSocketConnected }) => {
                 >
                   <div>
                     <h2 className="text-xl font-semibold">
-                      {allRooms.rooms[roomId]?.roomName}
+                      {selecetedRoom?.roomName}
                     </h2>
                     <p className="text-gray-400">
-                      Host: {allRooms.rooms[roomId]?.host?.name}
+                      Host: {selecetedRoom?.host?.name}
                     </p>
                     <p className="text-gray-400">
                       Players:
-                      {Object.keys(allRooms.rooms[roomId].members).length + 1}
+                      {Object.keys(selecetedRoom.members).length + 1}
                     </p>
                   </div>
-                  {!isInRoom ? (
+                  {!isInRoom && selecetedRoom.status === "waiting" ? (
                     <button
                       onClick={() => {
-                        handleJoinRoom(allRooms.rooms[roomId]);
+                        handleJoinRoom(selecetedRoom);
                       }}
                       className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                     >
@@ -223,7 +228,9 @@ const RoomList = ({ isSocketConnected }) => {
                       className="font-semibold py-2f px-4 mt-4 rounded-lg bg-gray-300 text-gray-600  cursor-not-allowed"
                       disabled
                     >
-                      Already In Room
+                      {selecetedRoom.status === "waiting" && "Room Is Full"}
+                      {selecetedRoom.status === "counting" && "Starting"}
+                      {selecetedRoom.status === "in-game" && "In Game"}
                     </button>
                   )}
                 </div>

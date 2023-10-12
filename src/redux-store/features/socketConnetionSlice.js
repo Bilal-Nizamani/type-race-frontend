@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 // data that would would shared through socket.io when game is being played
-const initialState = { connection: false };
+const initialState = { connection: false, type: "" };
 
 export const socketConnectionSlice = createSlice({
   name: "socket-connection",
