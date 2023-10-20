@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ContextMenu from "./ContextMenu";
-import { useDispatch } from "react-redux";
 
 const UserInRoom = ({ player, isHost, myData, amIHost }) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
@@ -10,7 +9,6 @@ const UserInRoom = ({ player, isHost, myData, amIHost }) => {
       return !old;
     });
   };
-
   return (
     <div
       onClick={() => {
@@ -38,7 +36,9 @@ const UserInRoom = ({ player, isHost, myData, amIHost }) => {
             ? { color: "rgba(59 130 246)" }
             : { color: "white" }
         }
-        className="  text-lg"
+        className={`text-lg  ${
+          player?.status === "checking-result" ? "opacity-50" : "opacity-1"
+        }`}
       >
         {player?.userName} {isHost ? "👑" : ""}
       </span>

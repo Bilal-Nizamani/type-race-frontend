@@ -20,7 +20,6 @@ const ContextMenu = ({ isContextMenuOpen, playerData, myData, amIHost }) => {
 
   useEffect(() => {
     setIsVisible(isContextMenuOpen);
-    console.log("asdfasd");
   }, [isContextMenuOpen]);
 
   return (

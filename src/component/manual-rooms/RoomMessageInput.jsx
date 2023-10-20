@@ -17,7 +17,6 @@ const RoomMessageInput = ({ isSocketConnected, roomId }) => {
         value={myMessage}
         onKeyPress={(e) => {
           if (e.key === "Enter" && myMessage.trim().length > 0) {
-            console.log("hey");
             handleSendMessage();
           }
         }}

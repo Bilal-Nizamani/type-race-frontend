@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import RoomMessageInput from "./RoomMessageInput";
 import socketService from "@/config/socket";
 import UserInRoom from "./UserInRoom";
@@ -9,11 +9,21 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
   const [messages, setMessages] = useState([]);
   const [playersKeys, setPlayersKeys] = useState([]);
   const [roomData, setRoomData] = useState({});
+  const [canGameBeStarted, setCanGameBeStarted] = useState("");
 
   const myData = useSelector((state) => {
     return state.userProfileData;
   });
-
+  const checkGameStartValidation = useCallback((playersKeys, room) => {
+    if (playersKeys.length > 0) {
+      for (let i = 0; i < playersKeys.length; i++) {
+        if (room.members[playersKeys[i]].status !== "waiting") {
+          setCanGameBeStarted(false);
+          break; // No need to continue checking once one member is not in 'waiting'
+        } else setCanGameBeStarted(true);
+      }
+    } else setCanGameBeStarted(false);
+  }, []);
   useEffect(() => {
     if (isSocketConnected) {
       socketService.socket.on("someone_joined_room", (userName) => {
@@ -34,9 +44,9 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
           arrayOfPlayersKeys.push(key);
         }
         setPlayersKeys(arrayOfPlayersKeys);
-
         setRoomData(room);
       });
+
       socketService.socket.on("new_message_added", (message) => {
         setMessages((oldMessages) => {
           let updateMessages = [...oldMessages, message];
@@ -48,7 +58,6 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
 
   const handleStartRace = () => {
     if (isSocketConnected) socketService.socket.emit("manual_start_race", {});
-    console.log("startRAce");
   };
   const cancelRoomCounting = () => {
     if (isSocketConnected) socketService.socket.emit("cancel_counting", {});
@@ -60,7 +69,8 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
     }
     setPlayersKeys(arrayOfPlayersKeys);
     setRoomData(myRoomData);
-  }, [myRoomData]);
+    checkGameStartValidation(arrayOfPlayersKeys, myRoomData);
+  }, [myRoomData, checkGameStartValidation]);
 
   return (
     <div className="my-4 w-full p-3">
@@ -93,11 +103,11 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
                   <button
                     onClick={handleStartRace}
                     className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none ${
-                      playersKeys.length < 1
+                      !canGameBeStarted
                         ? "cursor-not-allowed opacity-50"
                         : " hover:bg-blue-600"
                     }`}
-                    disabled={playersKeys.length < 1}
+                    disabled={!canGameBeStarted}
                   >
                     Start Race
                   </button>
@@ -105,12 +115,8 @@ const Room = ({ handleLeaveRoom, isSocketConnected, myRoomData, timer }) => {
               : roomData?.host?.userName === myData?.userName && (
                   <button
                     onClick={cancelRoomCounting}
-                    className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none ${
-                      playersKeys.length < 1
-                        ? "cursor-not-allowed opacity-50"
-                        : " hover:bg-blue-600"
-                    }`}
-                    disabled={playersKeys.length < 1}
+                    className={`bg-blue-500  text-white w-full font-bold py-2 px-4 rounded focus:outline-none hover:bg-blue-600
+                    `}
                   >
                     Cancel
                   </button>

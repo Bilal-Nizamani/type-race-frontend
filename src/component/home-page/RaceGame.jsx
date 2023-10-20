@@ -138,7 +138,6 @@ const RaceGame = ({ gameMode, handleLeaveRoom }) => {
     userShareData,
     isSocketConnected,
   ]);
-
   useEffect(() => {
     const gameCompletedOrTimerEnded = () => {
       setGameEnd(true);
