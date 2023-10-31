@@ -11,7 +11,7 @@ const GameTimer = memo(function GameTimer({
 }) {
   const [roomTimer, setRoomTimer] = useState(200);
   const isSocketConnected = useSelector(
-    (state) => state.socketConnection.autoRoomConnection
+    (state) => state.socketConnection.connection
   );
 
   useEffect(() => {

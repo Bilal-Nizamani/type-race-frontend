@@ -4,7 +4,7 @@ const manipulateStringNdColors = (string1, string2, index, wrong) => {
     throw new Error("Index out of bounds");
   }
 
-  const spanStart = `<span class='  text-green-500 border-r-[1px] border-black underline'>`;
+  const spanStart = `<span class='  text-green-500 border-r-[2px] border-green-500 underline'>`;
   const spanStartWrong = `<span class='  bg-red-500'>`;
   const spanEnd = "</span>";
 

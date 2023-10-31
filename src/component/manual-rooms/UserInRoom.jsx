@@ -36,7 +36,9 @@ const UserInRoom = ({ player, isHost, myData, amIHost }) => {
             ? { color: "rgba(59 130 246)" }
             : { color: "white" }
         }
-        className="  text-lg"
+        className={`text-lg  ${
+          player?.status === "checking-result" ? "opacity-50" : "opacity-1"
+        }`}
       >
         {player?.userName} {isHost ? "👑" : ""}
       </span>

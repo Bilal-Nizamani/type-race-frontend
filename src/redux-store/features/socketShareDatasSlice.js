@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 // data that would would shared through socket.io when game is being played
+
 const initialState = {
   car: "",
   userName: "",

@@ -12,9 +12,9 @@ const CarRoad = memo(function CarRoad() {
   const [otherPlayersData, setOtherPlayersData] = useState([]);
   const romPlData = useSelector((state) => state.roomConnectedPlayersData);
   const gameData = useSelector((state) => state.gamePlayData);
-  const socketSharedData = useSelector((state) => state.socketSharedData);
+  const myProfileData = useSelector((state) => state.userProfileData);
   const { arrayOfwrittenWords, orginalString } = gameData;
-  const { userName, car } = socketSharedData;
+  const { userName, car } = myProfileData;
 
   useEffect(() => {
     const writtenTextPercent =

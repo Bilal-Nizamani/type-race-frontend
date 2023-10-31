@@ -24,19 +24,19 @@ const ScoreBoard = ({ playedGameData }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-900 p-4 rounded-lg shadow-sm shadow-white">
-          <span className="text-white font-semibold">WPM</span>:{" "}
+          <span className="text-white font-semibold">WPM</span>:
           {playedGameData?.wpm}
         </div>
         <div className="bg-gray-900 p-4 rounded-lg shadow-sm shadow-white">
-          <span className="text-white font-semibold">Race Time</span>:{" "}
+          <span className="text-white font-semibold">Race Time</span>:
           {playedGameData?.typeTime}
         </div>
         <div className="bg-gray-900 p-4 rounded-lg shadow-sm shadow-white">
-          <span className="text-white font-semibold">Accuracy</span>:{" "}
+          <span className="text-white font-semibold">Accuracy</span>:
           {playedGameData?.accuracy}%
         </div>
         <div className="bg-gray-900 p-4 rounded-lg shadow-sm shadow-white">
-          <span className="text-white font-semibold">Mistakes</span>:{" "}
+          <span className="text-white font-semibold">Mistakes</span>:
           {playedGameData?.totalMistakes}
         </div>
       </div>

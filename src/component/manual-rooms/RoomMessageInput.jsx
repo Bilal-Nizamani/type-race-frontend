@@ -15,7 +15,14 @@ const RoomMessageInput = ({ isSocketConnected, roomId }) => {
       <input
         placeholder="Message"
         value={myMessage}
-        onChange={(e) => setMyMessage(e.target.value)}
+        onKeyPress={(e) => {
+          if (e.key === "Enter" && myMessage.trim().length > 0) {
+            handleSendMessage();
+          }
+        }}
+        onChange={(e) => {
+          setMyMessage(e.target.value);
+        }}
         className="w-full h-full bg-gray-700 py-3 px-4 text-white text-lg placeholder-gray-400 focus:outline-none"
       />
       <button

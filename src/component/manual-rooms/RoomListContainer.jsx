@@ -4,35 +4,39 @@ import RoomList from "./RoomList";
 import { useDispatch } from "react-redux";
 import { storeConnection } from "@/redux-store/features/socketConnetionSlice";
 import socketService from "@/config/socket";
-import { addUserData } from "@/redux-store/features/userProfileSlice";
+import { useSelector } from "react-redux";
+import { addUserShareData } from "@/redux-store/features/socketShareDatasSlice";
+
 const RoomListContainer = () => {
   const dispatch = useDispatch();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const myData = useSelector((state) => state.userProfileData);
+  const { car, userName } = useSelector((state) => state.userProfileData);
+
   useEffect(() => {
-    if (!isSocketConnected) socketService.connect(true);
-    const randomNumbers = Math.floor(10000 + Math.random() * 100000); // Generates a random 5-digit number
+    try {
+      if (!isSocketConnected) socketService.connect(true);
 
-    socketService.onConnect(() => {
-      let playerData = {
-        userName: "bila" + randomNumbers,
-        name: "b" + randomNumbers,
-        level: 1,
-        averageWpm: Math.random() * 100 + 20,
-      };
-      dispatch(addUserData(playerData));
-      socketService.socket.emit("player_info", playerData);
+      socketService.onConnect(() => {
+        socketService.socket.emit("player_info", myData);
 
-      setIsSocketConnected(true);
-      dispatch(storeConnection({ roomListConnection: true }));
-    });
-    if (isSocketConnected) {
-      return () => {
-        socketService.socket.disconnect();
-        socketService.socket = null;
-        dispatch(storeConnection({ roomListConnection: false }));
-      };
+        setIsSocketConnected(true);
+        dispatch(storeConnection({ connection: true, type: "manual-room" }));
+      });
+      if (isSocketConnected) {
+        return () => {
+          socketService.socket.disconnect();
+          socketService.socket = null;
+          dispatch(storeConnection({ connection: false }));
+        };
+      }
+    } catch (err) {
+      console.log(err);
     }
-  }, [isSocketConnected, dispatch]);
+  }, [isSocketConnected, dispatch, myData]);
+  useEffect(() => {
+    if (isSocketConnected) dispatch(addUserShareData({ car, userName }));
+  }, [isSocketConnected, car, userName, dispatch]);
   return <RoomList isSocketConnected={isSocketConnected} />;
 };
 

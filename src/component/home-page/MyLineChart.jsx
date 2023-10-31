@@ -44,7 +44,6 @@ const MyLineChart = memo(function MyLineChart({ isRaceCompleted }) {
       };
       let secondAndWpmArrays = processArray(updatedPlayedGameData.wpmObj);
 
-      console.log(updatedPlayedGameData.wpmObj);
       setPlayedGameData({
         ...updatedPlayedGameData,
         ...secondAndWpmArrays,

@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  name: "",
-  userName: "",
-  averageWpm: 0,
-  level: 1,
+  userName: "bila" + Math.random() * 900000 + 20,
+  name: "b" + Math.random() * 900000 + 20,
+  car: Math.floor(Math.random() * 4 + 1),
+  averageWpm: Math.random() * 100 + 20,
   avtar: 1,
   awards: "",
 };
